@@ -53,10 +53,8 @@ export default function ResumeConsulter() {
         Our tool will provide insights and suggestions to help you tailor your resume for the best chance of landing the job.
       </p>
 
-      {/* === BEFORE CONSULT === */}
       {!showResult && (
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Input: Job Description */}
           <div>
             <p className="font-semibold mb-2">Job description</p>
             <textarea
@@ -67,7 +65,6 @@ export default function ResumeConsulter() {
             />
           </div>
 
-          {/* Input: Resume Upload */}
           <div>
             <p className="font-semibold mb-2">Resume</p>
             <label
@@ -92,12 +89,11 @@ export default function ResumeConsulter() {
             </label>
           </div>
 
-          {/* Submit Button */}
           <div className="md:col-span-2 flex justify-center">
             <button
               onClick={handleConsult}
               disabled={!resumeFile || !jobDescription || loading}
-              className="bg-[#468585] hover:bg-[#386969] text-white px-10 py-2 rounded-full font-medium transition disabled:opacity-50"
+              className="bg-[#468585] hover:cursor-pointer hover:bg-[#386969] text-white px-10 py-2 rounded-full font-medium transition disabled:opacity-50"
             >
               {loading ? 'Consulting...' : 'Consult'}
             </button>
@@ -105,10 +101,8 @@ export default function ResumeConsulter() {
         </div>
       )}
 
-      {/* === AFTER CONSULT === */}
       {showResult && resultData && (
         <div className="space-y-10 mt-10">
-          {/* Job Description Display */}
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <p className="font-semibold mb-2">Job description</p>
@@ -119,14 +113,13 @@ export default function ResumeConsulter() {
 
             <div>
               <p className="font-semibold mb-2">Resume</p>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center nu gap-2 text-sm">
                 📄 {resumeFile?.name}{' '}
                 <span className="text-blue-600 underline cursor-pointer">Preview</span>
               </div>
             </div>
           </div>
 
-          {/* Results */}
           <div className="grid md:grid-cols-2 gap-10">
             <div className="space-y-4">
               <div>

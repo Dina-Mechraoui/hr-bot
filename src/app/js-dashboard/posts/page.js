@@ -43,8 +43,6 @@ export default function JobsPage() {
 
   return (
     <div className="p-4 md:p-10">
-      <h1 className="text-3xl font-bold mb-8">Job Openings</h1>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {jobs.map((job) => (
           <div key={job.id} className="bg-white rounded-lg shadow p-4">
@@ -54,13 +52,13 @@ export default function JobsPage() {
             <div className="mt-4 flex justify-between">
               <button
                 onClick={() => setSelectedApp(job)}
-                className="text-sm px-4 py-2 border rounded hover:bg-gray-100"
+                className="text-sm px-4 py-2 hover:cursor-pointer border rounded hover:bg-gray-100"
               >
                 Details
               </button>
               <button
                 onClick={() => router.push(`/js-dashboard/posts/${job.id}/interview`)}
-                className="text-sm px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600"
+                className="text-sm px-4 hover:cursor-pointer  py-2 bg-teal-500 text-white rounded hover:bg-teal-600"
               >
                 Interview
               </button>
@@ -80,7 +78,6 @@ export default function JobsPage() {
             </button>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* LEFT SIDE */}
               <div>
                 <h2 className="text-2xl font-bold mb-1">{selectedApp.title}</h2>
                 <p className="text-gray-600 font-medium mb-6">{selectedApp.company}</p>
@@ -116,11 +113,9 @@ export default function JobsPage() {
                 </ul>
               </div>
 
-              {/* RIGHT SIDE */}
               <div>
                 <img
                   src={selectedApp.details.images[0]}
-                  alt="Main"
                   className="rounded-lg w-full h-44 object-cover mb-4"
                 />
 
@@ -129,7 +124,6 @@ export default function JobsPage() {
                     <img
                       key={i}
                       src={img}
-                      alt={`Office image ${i + 1}`}
                       className="w-16 h-16 object-cover rounded-md"
                     />
                   ))}
@@ -146,7 +140,6 @@ export default function JobsPage() {
               </div>
             </div>
 
-            {/* INTERVIEW BUTTON */}
             <div className="mt-6 text-center">
               <button
                 onClick={() => {

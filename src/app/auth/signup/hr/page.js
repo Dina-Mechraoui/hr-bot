@@ -2,50 +2,62 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff } from '@deemlol/next-icons';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import ReCAPTCHA from 'react-google-recaptcha';
+import Link from 'next/link';
 
 export default function Agent() {
-  const [fileName, setFileName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    field: '',
+    company: '',
+    companyField: '',
     email: '',
     password: '',
     gender: '',
-    dob: {
-      month: '',
-      day: '',
-      year: '',
-    },
-    resume: null,
+    dob: null,
     acceptTerms: false,
   });
-
-  const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setFileName(e.target.files[0].name);
-      setFormData((prev) => ({ ...prev, resume: e.target.files[0] }));
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    if (name === 'acceptTerms') {
-      setFormData((prev) => ({ ...prev, acceptTerms: checked }));
-    } else if (['month', 'day', 'year'].includes(name)) {
-      setFormData((prev) => ({
-        ...prev,
-        dob: { ...prev.dob, [name]: value },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form Data:', formData);
+
+    const { name, company, companyField, email, password, dob, acceptTerms } = formData;
+
+    if (!name || !email || !password || !company || !companyField || !dob) {
+      alert('Please fill all required fields including your date of birth.');
+      return;
+    }
+
+    if (!acceptTerms) {
+      alert('You must accept the terms and privacy policy.');
+      return;
+    }
+
+    const formattedDOB = dayjs(dob).format('YYYY-MM-DD');
+
+    const submissionData = {
+      ...formData,
+      dob: formattedDOB,
+    };
+
+    console.log('Form Data:', submissionData);
   };
 
   return (
@@ -58,151 +70,133 @@ export default function Agent() {
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-2">Sign up</h2>
         <p className="text-sm text-center text-gray-500 mb-6">Sign up with your email address</p>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="fullName"
+        <form className="space-y-3" onSubmit={handleSubmit}>
+          <TextField
+            name="name"
+            label="Full Name"
+            placeholder='Enter your profile name'
             value={formData.name}
-            placeholder="Enter your full name"
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
+            fullWidth
+            className='!mb-3'
           />
-          <input
-            type="text"
-            name="field"
-            value={formData.field}
-            placeholder="Enter your company name"
+
+          <TextField
+            name="company"
+            label="Company Name"
+            placeholder='Enter your company name'
+            value={formData.company}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
+            fullWidth
+            className='!mb-3'
           />
-          <input
-            type="text"
+
+          <TextField
             name="companyField"
-            value={formData.field}
-            placeholder="Enter your company field"
+            label="Company Field"
+            placeholder='Enter your company field'
+            value={formData.companyField}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
+            fullWidth
+            className='!mb-3'
           />
 
-          <input
-            type="email"
+          <TextField
             name="email"
+            label="Email"
+            type="email"
+            placeholder='enter your email'
             value={formData.email}
-            placeholder="Enter your email address"
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
+            fullWidth
+            className='!mb-3'
           />
 
-          {/* Password */}
-          <div>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-[#468585]"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
+          <TextField
+            name="password"
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
           <p className="text-xs text-gray-500">
             Use 8 or more characters with a mix of letters, numbers & symbols
           </p>
 
-          {/* Gender */}
-          <div className="text-sm text-gray-700">
-            <p className="mb-1">
-              What's your gender? <span className="text-gray-400">(optional)</span>
-            </p>
-            <div className="flex gap-6">
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="female"
-                  checked={formData.gender === 'female'}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Female
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="male"
-                  checked={formData.gender === 'male'}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Male
-              </label>
-            </div>
+          <div className="text-sm flex flex-col sm:flex-row gap-3 justify-between   text-gray-700">
+            <span>
+              <p className="mb-1">
+                What's your gender? <span className="text-gray-400">(optional)</span>
+              </p>
+              <div className="flex gap-6">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="female"
+                    checked={formData.gender === 'female'}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  Female
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="male"
+                    checked={formData.gender === 'male'}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  Male
+                </label>
+              </div>
+            </span>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={formData.dob}
+                label="Date of Birth"
+                onChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    dob: value,
+                  }))
+                }
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+            </LocalizationProvider>
           </div>
 
-          {/* DOB */}
-          <div className="text-sm text-gray-700">
-            <p className="mb-1">What's your date of birth?</p>
-            <div className="flex gap-2">
-              <select
-                name="month"
-                value={formData.dob.month}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
-              >
-                <option>Month</option>
-                <option>Jan</option>
-                <option>Feb</option>
-                <option>Mar</option>
-              </select>
-              <select
-                name="day"
-                value={formData.dob.day}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
-              >
-                <option>Day</option>
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-              </select>
-              <select
-                name="year"
-                value={formData.dob.year}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#468585]"
-              >
-                <option>Year</option>
-                <option>2000</option>
-                <option>2001</option>
-                <option>2002</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Terms */}
           <p className="text-xs text-gray-500">
             By creating an account, you agree to the{' '}
-            <a href="#" className="text-[#468585] underline">Terms of use</a> and{' '}
-            <a href="#" className="text-[#468585] underline">Privacy Policy</a>.
+            <a href="#" target='_blank' className="text-[#468585] underline">Terms of use</a> and{' '}
+            <a href="#" target='_blank' className="text-[#468585] underline">Privacy Policy</a>.
           </p>
 
-          {/* reCAPTCHA Placeholder */}
-          <div className="flex justify-center">
-            <div className="mt-2 bg-gray-100 rounded px-4 py-2 text-sm text-gray-700">
-              [reCAPTCHA placeholder]
-            </div>
-          </div>
+
+            <ReCAPTCHA
+              sitekey="6LekIBYrAAAAAJTHgVpcACRiNdCHZ5rR6DRNmVc9"
+              onChange={(value) => {
+                setCaptchaValue(value);
+              }}
+              theme="light"
+              size="normal"
+            />
 
           <button
             type="submit"
@@ -213,7 +207,9 @@ export default function Agent() {
 
           <p className="text-sm text-center text-gray-500 mt-4">
             Already have an account?{' '}
-            <a href="/auth/signin" className="underline text-[#468585]">Log in</a>
+            <Link href="/auth/signin" className="underline text-[#468585]">
+              Log in
+            </Link>
           </p>
         </form>
       </div>

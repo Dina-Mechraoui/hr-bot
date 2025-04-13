@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SignUp() {
   const router = useRouter();
 
   return (
-    <main
+    <div
       className={`
         relative min-h-screen flex items-center justify-center
         bg-cover bg-center bg-no-repeat
@@ -15,15 +16,13 @@ export default function SignUp() {
       `}
       style={{ backgroundImage: "url('/assets/SignMenu.png')" }}
     >
-      <div className="sm:hidden absolute inset-0 bg-black/40 z-0" />
       <div className="hidden sm:block absolute inset-0 bg-black/30 backdrop-blur-sm z-0" />
-
       <section
         className={`
           relative z-10 bg-[#F9F5F6]
-          w-full sm:w-11/12 md:w-4/5 lg:w-2/3 xl:w-1/2
-          h-full sm:h-auto
-          rounded-none sm:rounded-2xl
+          w-full md:w-11/12 xl:w-1/2
+          max-h-md
+          rounded-none md:rounded-2xl
           p-6 sm:p-10 md:p-12 lg:p-16
           shadow-none sm:shadow-lg
           flex flex-col justify-center
@@ -49,12 +48,12 @@ export default function SignUp() {
                 Are you an HR professional looking to streamline your recruitment process? Our AI tool lets you easily post job offers, track applicants, and use a chatbot for initial interviews.
               </p>
             </div>
-            <button
-              onClick={() => router.push('/auth/signup/hr')}
+            <Link
+              href='/auth/signup/hr'
               className="w-full bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
             >
               I am an HR agent
-            </button>
+            </Link>
           </div>
 
           <div className="hidden md:flex justify-center items-center">
@@ -68,22 +67,22 @@ export default function SignUp() {
                 Are you seeking new opportunities? Our AI tool matches your skills with job offers, gives feedback on your resume, and helps you find your next step with confidence.
               </p>
             </div>
-            <button
-              onClick={() => router.push('/auth/signup/jobseeker')}
+            <Link
+              href='/auth/signup/jobseeker'
               className="w-full bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
             >
               I am a job seeker
-            </button>
+            </Link>
           </div>
         </div>
 
         <p className="text-sm mt-10 text-center text-gray-600">
           Already have an account?{' '}
-          <a href="/auth/signin" className="underline font-medium text-[#468585] hover:text-[#386969]">
+          <Link href="/auth/signin" className="underline font-medium text-[#468585] hover:text-[#386969]">
             Log in
-          </a>
+          </Link>
         </p>
       </section>
-    </main>
+    </div>
   );
 }

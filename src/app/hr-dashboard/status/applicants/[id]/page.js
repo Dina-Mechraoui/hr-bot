@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
+import ConfirmActionModal from '@/components/hr/ConfirmActionModal';
 
 const dummyApplicants = [
   {
@@ -44,6 +45,8 @@ export default function ApplicantsPage() {
   const jobId = params.jobId;
   const [applicants, setApplicants] = useState(dummyApplicants);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [confirmReject, setConfirmReject] = useState(null);
+  const [confirmHire, setConfirmHire] = useState(null);
 
   return (
     <div className="p-6 space-y-6">
@@ -63,9 +66,11 @@ export default function ApplicantsPage() {
                 {applicant.name}
               </p>
               <p className="text-xs text-gray-600 font-semibold">
-                {applicant.company} • <span className="font-normal">{applicant.submitted}</span>
+                {applicant.company} •{' '}
+                <span className="font-normal">{applicant.submitted}</span>
               </p>
               <button
+                onClick={() => setConfirmReject(applicant)}
                 className="text-xs text-red-600 mt-2 hover:cursor-pointer hover:underline"
               >
                 I want to reject this applicant
@@ -79,7 +84,10 @@ export default function ApplicantsPage() {
               >
                 Details
               </button>
-              <button className="px-4 py-2 rounded-full bg-[#468585] hover:cursor-pointer text-white text-sm font-medium hover:bg-[#386969] transition">
+              <button
+                onClick={() => setConfirmHire(applicant)}
+                className="px-4 py-2 rounded-full bg-[#468585] hover:cursor-pointer text-white text-sm font-medium hover:bg-[#386969] transition"
+              >
                 Hire
               </button>
             </div>
@@ -91,10 +99,36 @@ export default function ApplicantsPage() {
         <p className="text-gray-500 mt-8">No applicants remaining for this job.</p>
       )}
 
-      {/* Modal */}
+      {confirmReject && 
+        <ConfirmActionModal
+        onClose={() => setConfirmReject(null)}
+        onConfirm={() => {
+          setConfirmReject(null);
+          setSelectedApplicant(null);
+        }}
+        title="Reject Applicant"
+        message={`Are you sure you want to reject "${confirmReject?.name}"?`}
+        type="reject"
+        />
+      }
+
+
+      {confirmHire &&
+        <ConfirmActionModal
+        onClose={() => setConfirmHire(null)}
+        onConfirm={() => {
+          setConfirmHire(null);
+          setSelectedApplicant(null);
+        }}
+        title="Hire Applicant"
+        message={`Are you sure you want to hire "${confirmHire?.name}"?`}
+        type="hire"
+        />
+      }
+
       {selectedApplicant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs">
-          <div className="bg-white rounded-lg shadow-lg p-16 w-full max-w-3xl relative">
+        <div className="fixed inset-0 p-2 z-50 flex items-center justify-center bg-black/20">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl relative max-h-[90vh] overflow-y-auto p-6 md:p-12">
             <button
               onClick={() => setSelectedApplicant(null)}
               className="absolute top-4 right-4 text-gray-500 hover:text-black hover:cursor-pointer"
@@ -102,31 +136,29 @@ export default function ApplicantsPage() {
               ✕
             </button>
 
-            <h2 className="text-xl font-bold mb-4">{selectedApplicant.name}</h2>
+            <h2 className="text-xl font-bold mb-6">{selectedApplicant.name}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className='font-semibold'>Matching percentage</p>
+                <p className="font-semibold">Matching percentage</p>
                 <p className="mb-4">{selectedApplicant.matching}</p>
 
-                <p className='font-semibold'>Final thought</p>
+                <p className="font-semibold">Final thought</p>
                 <p className="mb-4">{selectedApplicant.finalThought}</p>
 
-                <p className='font-semibold'>Strengths</p>
+                <p className="font-semibold">Strengths</p>
                 <ul className="list-disc list-inside mb-4">
-                  {selectedApplicant.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                  {selectedApplicant.strengths.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
                 </ul>
 
-                <p className='font-semibold'>Weaknesses</p>
-                <ul className="list-disc list-inside mb-4">
-                  {selectedApplicant.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
+                <p className="font-semibold">Weaknesses</p>
+                <ul className="list-disc list-inside mb-6">
+                  {selectedApplicant.weaknesses.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
                 </ul>
-
-                <button
-                  className="text-xs text-red-600 hover:cursor-pointer hover:underline"
-                >
-                  I want to reject this applicant
-                </button>
               </div>
 
               <div className="flex flex-col items-center">
@@ -135,25 +167,38 @@ export default function ApplicantsPage() {
                   alt="applicant resume preview"
                   className="w-48 h-48 object-cover rounded-md mb-4"
                 />
-                <p className='text-left self-start font-semibold'>Resume</p>
+                <p className="text-left self-start font-semibold">Resume</p>
                 <a
                   target="_blank"
-                  className="text-sm flex self-start gap-4"
+                  href={selectedApplicant.resumeLink}
+                  className="text-sm flex self-start gap-4 items-center mt-2"
                 >
-                  <img src='/assets/resume_.svg'/>
-                  {selectedApplicant.resumeName} • <span className='text-[#468585] hover:cursor-pointer hover:underline'>Preview</span>
+                  <img src="/assets/resume_.svg" className="w-5 h-5" />
+                  {selectedApplicant.resumeName}
+                  <span className="text-[#468585] hover:underline">Preview</span>
                 </a>
-
-                <button
-                  className="mt-6 px-6 py-2 rounded-full bg-[#468585] text-white hover:cursor-pointer hover:bg-[#386969]"
-                >
-                  hire
-                </button>
               </div>
+            </div>
+
+            <div className="mt-10 flex justify-between items-center">
+              <button
+                onClick={() => setConfirmReject(selectedApplicant)}
+                className="text-sm text-red-600 hover:cursor-pointer hover:underline"
+              >
+                I want to reject this applicant
+              </button>
+
+              <button
+                onClick={() => setConfirmHire(selectedApplicant)}
+                className="px-6 py-2 rounded-full bg-[#468585] text-white hover:cursor-pointer hover:bg-[#386969]"
+              >
+                Hire
+              </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

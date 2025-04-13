@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
 
-export default function CandidateSettings() {
+export default function JSSettings() {
   const initialUser = {
     name: 'Lilia Ali',
     email: 'jennyfox@gmail.com',
@@ -17,6 +18,7 @@ export default function CandidateSettings() {
   const [editingField, setEditingField] = useState(null);
   const [tempValue, setTempValue] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleEdit = (field, value) => {
     setEditingField(field);
@@ -45,6 +47,14 @@ export default function CandidateSettings() {
     }
   };
 
+  const handleCancelAll = () => {
+    setUser(initialUser);
+    setEditingField(null);
+    setTempValue('');
+  };
+
+  const madeChanges = JSON.stringify(user) !== JSON.stringify(initialUser);
+
   return (
     <div className="md:p-10 p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -54,17 +64,9 @@ export default function CandidateSettings() {
             <div className="relative w-40 h-40">
               <div className="w-full h-full rounded-full bg-gray-200 overflow-hidden">
                 {user.photo ? (
-                  <img
-                    src={user.photo}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={user.photo} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <img
-                    src="/avatar-placeholder.svg"
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src="/avatar-placeholder.svg" alt="Avatar" className="w-full h-full object-cover" />
                 )}
               </div>
               <label
@@ -89,7 +91,7 @@ export default function CandidateSettings() {
             </div>
           </div>
 
-          {/* Info fields */}
+          {/* Editable Fields */}
           <div className="space-y-6 text-sm text-gray-700">
             {[
               { label: 'Name', field: 'name' },
@@ -103,7 +105,7 @@ export default function CandidateSettings() {
                   <p className="text-gray-500">{label}</p>
                   {editingField !== field && (
                     <button
-                      className="text-blue-600 text-xs underline"
+                      className="hover:cursor-pointer text-xs underline"
                       onClick={() => handleEdit(field, user[field])}
                     >
                       Edit
@@ -141,58 +143,97 @@ export default function CandidateSettings() {
           </div>
         </div>
 
-        {/* RIGHT */}
+        {/* Right Side */}
         <div className="space-y-10 text-sm text-gray-800">
-          {/* Resume Upload */}
+          {/* Resume */}
           <div>
             <p className="font-semibold mb-2">Resume</p>
             <p className="font-semibold text-black mb-2">{user.resumeName}</p>
             <div
-  className="border border-dashed border-gray-300 rounded-lg p-5 flex items-center justify-between relative"
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
-      setResumeFile(file);
-      setUser((prev) => ({ ...prev, resumeName: file.name }));
-    }
-  }}
->
-  <div className="flex items-center gap-2">
-    <span className="text-2xl">📤</span>
-    <div>
-      <p className="font-semibold text-sm">Select a file or drag and drop here</p>
-      <p className="text-xs text-gray-500">PDF, file size no more than 10MB</p>
-    </div>
-  </div>
-
-  {/* Clickable upload button */}
-  <label
-    htmlFor="resume-upload"
-    className="text-white bg-[#468585] text-sm px-4 py-2 rounded cursor-pointer hover:bg-[#386969]"
-  >
-    Replace File
-  </label>
-  <input
-    id="resume-upload"
-    type="file"
-    accept="application/pdf"
-    className="hidden"
-    onChange={handleResumeUpload}
-  />
-</div>
-
+              className="border border-dashed border-gray-300 rounded-lg p-5 flex items-center justify-between relative"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'application/pdf') {
+                  setResumeFile(file);
+                  setUser((prev) => ({ ...prev, resumeName: file.name }));
+                }
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">
+                  <img src="/assets/upload.svg" />
+                </span>
+                <div>
+                  <p className="font-semibold text-sm">Select a file or drag and drop here</p>
+                  <p className="text-xs text-gray-500">PDF, file size no more than 10MB</p>
+                </div>
+              </div>
+              <label
+                htmlFor="resume-upload"
+                className="text-white bg-[#468585] text-sm px-4 py-2 rounded cursor-pointer hover:bg-[#386969]"
+              >
+                Replace File
+              </label>
+              <input
+                id="resume-upload"
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleResumeUpload}
+              />
+            </div>
           </div>
 
           {/* Delete Account */}
           <div className="space-y-1">
             <p className="font-semibold">Delete account</p>
-            <button className="text-red-600 text-sm mt-1 hover:underline font-semibold">
+            <p className="text-gray-600">Do you want to delete your account?</p>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="text-red-600 text-sm mt-2 hover:underline hover:cursor-pointer font-semibold"
+            >
               I want to delete my account
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <DeleteAccountModal
+          post={{ title: initialUser.name }}
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            setShowDeleteModal(false);
+          }}
+        />
+      )}
+
+      <div className="mt-10 flex justify-end gap-4">
+        <button
+          onClick={handleCancelAll}
+          disabled={!madeChanges}
+          className={`px-5 py-2 text-sm rounded border ${
+            madeChanges
+              ? 'text-gray-700 border-gray-300 hover:bg-gray-100 hover:cursor-pointer'
+              : 'text-gray-400 border-gray-200 cursor-not-allowed bg-gray-100'
+          }`}
+        >
+          Cancel
+        </button>
+
+        <button
+          disabled={!madeChanges}
+          className={`px-5 py-2 text-sm rounded ${
+            madeChanges
+              ? 'bg-[#468585] text-white hover:bg-[#386969] hover:cursor-pointer'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Confirm
+        </button>
       </div>
     </div>
   );

@@ -227,7 +227,6 @@ export default function ApplicationStatus() {
     <div className="md:p-10 p-4">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Application Status</h1>
 
-      {/* Tabs */}
       <div className="flex gap-6 text-sm font-medium border-b mb-8">
         {tabs.map((tab) => (
           <button
@@ -236,7 +235,7 @@ export default function ApplicationStatus() {
             className={`pb-2 ${
               activeTab === tab
                 ? `${statusColors[tab]} border-b-2`
-                : 'text-gray-500 hover:text-[#468585]'
+                : 'text-gray-500 hover:text-[#468585] hover:cursor-pointer'
             }`}
           >
             {tab}
@@ -244,7 +243,6 @@ export default function ApplicationStatus() {
         ))}
       </div>
 
-      {/* Application List */}
       <div className="space-y-6">
         {list.length > 0 ? (
           list.map((item) => (

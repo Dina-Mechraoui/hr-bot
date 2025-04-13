@@ -91,7 +91,6 @@ export default function CreateJobPost() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="space-y-6 flex flex-col justify-between">
           <div className="space-y-6">
             <div>
@@ -156,10 +155,10 @@ export default function CreateJobPost() {
             </div>
           </div>
 
-          <div className="pt-4">
+          <div className="pt-4 self-end">
             <button
               type="submit"
-              className="bg-[#468585] text-white text-sm font-medium px-8 py-2 rounded-full hover:bg-[#386969] transition"
+              className="bg-[#468585] hover:cursor-pointer text-white text-sm font-medium px-8 py-2 rounded-full hover:bg-[#386969] transition"
             >
               Publish
             </button>

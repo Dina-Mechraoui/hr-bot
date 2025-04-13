@@ -3,17 +3,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MoreVertical } from '@deemlol/next-icons';
 import { useRouter } from 'next/navigation';
+import JobDetailsModal from '@/components/JobDetailsModal';
+import DeleteModal from '@/components/DeleteModal';
 
 export default function Status() {
-  const [openMenuId, setOpenMenuId] = useState(null);
+  const [openMenu, setOpenMenu] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
-  const menuRef = useRef(null);
+  const menuRefs = useRef({});
+  const [postToDelete, setPostToDelete] = useState(null);
+
   const router = useRouter();
 
   const jobPosts = [
     {
       id: 1,
-      title: 'Cybersec Analyst',
+      title: 'dinaaaaa Analyst',
       company: 'SecureNet Global',
       details: {
         name: 'Cybersecurity Analyst',
@@ -46,26 +50,64 @@ export default function Status() {
     },
     {
       id: 2,
-      title: 'UI/UX Designer',
-      company: 'PixelPerfect Studio',
+      title: 'Cybersec Analyst',
+      company: 'SecureNet Global',
       details: {
-        name: 'UI/UX Designer',
+        name: 'Cybersecurity Analyst',
         description:
-          'Join our creative team to design clean and user-friendly digital experiences across web and mobile platforms...',
+          'As a Cybersecurity Analyst at SecureNet Global, you will be responsible for monitoring, analyzing, and responding to security events and incidents across our clients\' networks...',
         qualifications: [
-          'Bachelor’s in Design, HCI, or related field.',
-          'Experience with Figma, Sketch, or Adobe XD.',
-          'Strong UX research skills.',
+          'Bachelor’s degree in Computer Science, Information Security or a related field.',
+          '3+ years of experience in cybersecurity or a similar role.',
+          'Proficiency in network security tools and technologies.',
+          'Strong knowledge of security protocols, cryptography, and risk management.',
+          'Experience with incident response and threat analysis.',
         ],
-        location: 'Remote',
-        type: 'Contract',
-        hours: 'Flexible',
-        salary: '80,000DZD - 100,000DZD',
-        benefits: ['Flexible schedule', 'Remote-friendly'],
-        companyOverview: 'PixelPerfect Studio creates engaging user experiences for startups and enterprises.',
-        contact: 'hello@pixelperfect.studio • 045-999-4422',
+        location: 'Hybrid - Bab Ezzouar, Alger',
+        type: 'Full-time',
+        hours: 'Monday to Friday, 9 AM to 5 PM (occasional on-call duties required)',
+        salary: '90,000DZD to 120,000DZD monthly',
+        benefits: [
+          'Comprehensive health, dental, and vision insurance.',
+          'Professional development opportunities and certification reimbursements.',
+        ],
+        companyOverview:
+          'SecureNet Global is a leading cybersecurity firm dedicated to protecting businesses worldwide from digital threats...',
+        contact: 'careers@securenetglobal.dz • 023-643-6753',
         images: [
           '/assets/details.png',
+          '/assets/details.png',
+          '/assets/details.png',
+        ],
+      },
+    },
+    {
+      id: 3,
+      title: 'Cybersec Analyst',
+      company: 'SecureNet Global',
+      details: {
+        name: 'Cybersecurity Analyst',
+        description:
+          'As a Cybersecurity Analyst at SecureNet Global, you will be responsible for monitoring, analyzing, and responding to security events and incidents across our clients\' networks...',
+        qualifications: [
+          'Bachelor’s degree in Computer Science, Information Security or a related field.',
+          '3+ years of experience in cybersecurity or a similar role.',
+          'Proficiency in network security tools and technologies.',
+          'Strong knowledge of security protocols, cryptography, and risk management.',
+          'Experience with incident response and threat analysis.',
+        ],
+        location: 'Hybrid - Bab Ezzouar, Alger',
+        type: 'Full-time',
+        hours: 'Monday to Friday, 9 AM to 5 PM (occasional on-call duties required)',
+        salary: '90,000DZD to 120,000DZD monthly',
+        benefits: [
+          'Comprehensive health, dental, and vision insurance.',
+          'Professional development opportunities and certification reimbursements.',
+        ],
+        companyOverview:
+          'SecureNet Global is a leading cybersecurity firm dedicated to protecting businesses worldwide from digital threats...',
+        contact: 'careers@securenetglobal.dz • 023-643-6753',
+        images: [
           '/assets/details.png',
           '/assets/details.png',
           '/assets/details.png',
@@ -75,20 +117,22 @@ export default function Status() {
   ];
 
   const toggleMenu = (id) => {
-    setOpenMenuId(openMenuId === id ? null : id);
+    setOpenMenu(openMenu === id ? null : id);
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setOpenMenuId(null);
+      const menuElement = menuRefs.current[openMenu];
+      if (menuElement && !menuElement.contains(event.target)) {
+        setOpenMenu(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [openMenu]);
+  
 
   return (
     <div className="p-6 space-y-6">
@@ -100,13 +144,16 @@ export default function Status() {
           <div key={post.id} className="flex flex-col border-b pb-4 relative">
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-900 flex items-center gap-2">
-                <span className="text-[#16a34a] text-xl">•</span> {post.title}
+                <span className="text-[#468585] text-xl">•</span> {post.title}
               </p>
 
-              <div className="hidden md:flex gap-2">
+              <div className="hidden md:flex z-40 gap-2">
                 <button
                   className="px-4 py-2 rounded-full bg-white text-sm font-medium hover:cursor-pointer hover:bg-gray-100 transition"
-                  onClick={() => router.push(`/hr-dashboard/status/applicants/${post.id}`)}
+                  onClick={() => {
+                    router.push(`/hr-dashboard/status/applicants/${post.id}`);
+                    setOpenMenu(null);
+                  }}
                 >
                   Applicants
                 </button>
@@ -114,24 +161,21 @@ export default function Status() {
                   Details
                 </button>
                 <button
-                  className="px-4 py-2 rounded-full bg-[#468585] text-white text-sm font-medium hover:bg-[#386969] transition"
+                  className="px-4 py-2 rounded-full bg-[#468585] text-white text-sm font-medium hover:bg-[#386969] hover:cursor-pointer transition"
                   onClick={()=>router.push(`/hr-dashboard/status/post/${post.id}`)}
                 >
                   Modify
                 </button>
               </div>
 
-              <div className="md:hidden relative" ref={menuRef}>
+              <div className="md:hidden relative" ref={(el) => (menuRefs.current[post.id] = el)}>
                 <button
                   onClick={() => toggleMenu(post.id)}
-                  aria-haspopup="true"
-                  aria-expanded={openMenuId === post.id}
-                  aria-controls={`menu-${post.id}`}
                 >
                   <MoreVertical className="w-5 h-5 text-gray-700" />
                 </button>
 
-                {openMenuId === post.id && (
+                {openMenu === post.id && (
                   <div
                     id={`menu-${post.id}`}
                     className="absolute right-0 top-6 bg-white border rounded-md shadow-md z-10 text-sm min-w-[120px]"
@@ -148,7 +192,7 @@ export default function Status() {
                     </button>
                     <button
                       className="block w-full px-4 py-2 hover:bg-[#468585] hover:text-white text-left"
-                      
+                      onClick={()=>router.push(`/hr-dashboard/status/post/${post.id}`)}
                     >
                       Modify
                     </button>
@@ -157,65 +201,23 @@ export default function Status() {
               </div>
             </div>
 
-            <button className="text-xs text-red-600 mt-2 w-fit cursor-pointer hover:underline">
+            <button className="text-xs text-red-600 mt-2 w-fit cursor-pointer hover:underline"
+            onClick={() => setPostToDelete(post)}>
               I want to delete this post
             </button>
+            <DeleteModal
+              post={postToDelete}
+              onCancel={() => setPostToDelete(null)}
+              onConfirm={() => {
+                setPostToDelete(null);
+              }}
+            />
+
           </div>
         ))}
       </div>
-
-      {/* ===== MODAL ===== */}
       {selectedJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs">
-          <div className="bg-white rounded-lg shadow-lg p-16 w-full max-w-5xl relative overflow-y-auto max-h-[90vh]">
-            <button
-              onClick={() => setSelectedJob(null)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black text-xl"
-            >
-              ✕
-            </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h2 className="text-2xl font-bold mb-2">{selectedJob.title}</h2>
-                <p className="text-gray-700 font-semibold mb-4">{selectedJob.company}</p>
-
-                <p><strong>Job Name:</strong> {selectedJob.details.name}</p>
-                <p className="my-4"><strong>Job Description:</strong><br />{selectedJob.details.description}</p>
-
-                <p className="font-semibold mt-4">Required Qualifications</p>
-                <ul className="list-disc list-inside text-sm mb-4">
-                  {selectedJob.details.qualifications.map((q, i) => <li key={i}>{q}</li>)}
-                </ul>
-
-                <p><strong>Location:</strong> {selectedJob.details.location}</p>
-                <p><strong>Employment Type:</strong> {selectedJob.details.type}</p>
-                <p><strong>Work Hours:</strong> {selectedJob.details.hours}</p>
-
-                <p className="font-semibold mt-4">Salary and Benefits</p>
-                <p>{selectedJob.details.salary}</p>
-                <ul className="list-disc list-inside text-sm">
-                  {selectedJob.details.benefits.map((b, i) => <li key={i}>{b}</li>)}
-                </ul>
-              </div>
-
-              <div>
-                <img src={selectedJob.details.images[0]} alt="office" className="rounded-lg mb-3" />
-                <div className="flex gap-2 mb-4">
-                  {selectedJob.details.images.slice(1).map((img, i) => (
-                    <img key={i} src={img} className="w-16 h-16 object-cover rounded-md" />
-                  ))}
-                </div>
-
-                <p className="font-semibold">Company Overview</p>
-                <p className="text-sm mb-4">{selectedJob.details.companyOverview}</p>
-
-                <p className="font-semibold">Contact</p>
-                <p className="text-sm">{selectedJob.details.contact}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <JobDetailsModal job={selectedJob} onClose={() => setSelectedJob(null)} />
       )}
     </div>
   );
