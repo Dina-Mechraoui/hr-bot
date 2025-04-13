@@ -134,7 +134,7 @@ export default function JobSeekerSignUp() {
           <div className="text-sm text-gray-700 flex flex-col gap-4 sm:flex-row justify-between">
             <span>
               <p className="mb-1">
-                What's your gender? <span className="text-gray-400">(optional)</span>
+                What&apos;s your gender? <span className="text-gray-400">(optional)</span>
               </p>
               <div className="flex gap-6">
                 <label className="inline-flex items-center">

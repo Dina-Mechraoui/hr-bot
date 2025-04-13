@@ -36,7 +36,7 @@ export default function SignIn() {
 
           <h2 className="text-2xl font-semibold text-center mb-2">Log in</h2>
           <p className="text-sm text-center mb-6 text-gray-600">
-            Don’t have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/auth/signup" className="underline font-medium">
               Sign up
             </Link>

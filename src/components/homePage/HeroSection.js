@@ -35,7 +35,7 @@ const HeroSection = () => {
         </h1>
         <p className="text-gray-800 text-md md:text-lg font-medium leading-relaxed">
           Optimize your hiring process or advance your job search with our AI-driven tools.
-          Whether you're an HR professional seeking to streamline recruitment or a job seeker
+          Whether you&apos;re an HR professional seeking to streamline recruitment or a job seeker
           aiming to improve your career prospects, HR-Agent is here to support you.
           Choose your role below to begin your journey.
         </p>

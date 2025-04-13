@@ -140,7 +140,7 @@ export default function Agent() {
           <div className="text-sm flex flex-col sm:flex-row gap-3 justify-between   text-gray-700">
             <span>
               <p className="mb-1">
-                What's your gender? <span className="text-gray-400">(optional)</span>
+                What&apos;s your gender? <span className="text-gray-400">(optional)</span>
               </p>
               <div className="flex gap-6">
                 <label className="inline-flex items-center">

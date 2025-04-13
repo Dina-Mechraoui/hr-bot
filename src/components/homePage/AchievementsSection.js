@@ -6,7 +6,7 @@ const AchievementsSection = () => {
                 Our Achievement
                         <img src="/assets/vector2.svg" alt="Vector" className="absolute  -bottom-5 -right-6 " />
                 </h1>
-                <p className="text-sm mb-18 font-semibold ml-12 text-gray-700">We’re proud of the impact we’ve made:</p>
+                <p className="text-sm mb-18 font-semibold ml-12 text-gray-700">We&apos;re proud of the impact we&apos;ve made:</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 justify-between gap-y-10">

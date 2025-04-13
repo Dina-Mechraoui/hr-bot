@@ -11,7 +11,7 @@ export default function DeleteModal({ post, onConfirm, onCancel }) {
         <h2 className="text-xl font-bold text-gray-800 mb-4">Delete Post</h2>
         <p className="text-gray-700 mb-6">
           Are you sure you want to delete the post{' '}
-          <span className="font-semibold text-[#468585]">"{post.title}"</span>?
+          <span className="font-semibold text-[#468585]">&quot;{post.title}&quot;</span>?
         </p>
 
         <div className="flex justify-end gap-4">
