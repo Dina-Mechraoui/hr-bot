@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { X } from '@deemlol/next-icons'
 
 const jobs = [
   {
@@ -31,7 +32,12 @@ const jobs = [
         '/assets/details.png',
         '/assets/details.png'
       ],
-      companyOverview: `SecureNet Global is a leading cybersecurity firm dedicated to protecting businesses worldwide from digital threats. With a focus on innovative security solutions and a commitment to excellence, we help our clients navigate the complex landscape of cybersecurity.`,
+      companyOverview: `SecureNet Global is a leading cybersecurity firm dedicated to protecting 
+        businesses worldwide from digital threats. With a focus on innovative 
+        security solutions and a commitment to excellence, we help our clients
+        navigate the complex landscape of cybersecurity. Our team is passionate 
+        about staying ahead of emerging threats and delivering top-tier services that 
+        ensure our clients' data and networks remain secure.`,
       contact: `For any inquiries, please contact our HR department at careers@securenetglobal.dz\n023–643–6753.`
     }
   }
@@ -72,9 +78,9 @@ export default function JobsPage() {
           <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-6xl relative overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => setSelectedApp(null)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black text-xl"
+              className="absolute hover:cursor-pointer top-4 right-4 text-gray-500 hover:text-black text-xl"
             >
-              ✕
+              <X/>
             </button>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -146,7 +152,7 @@ export default function JobsPage() {
                   setSelectedApp(null)
                   router.push(`/js-dashboard/posts/${selectedApp.id}/interview`)
                 }}
-                className="bg-teal-600 text-white text-sm px-8 py-3 rounded-md hover:bg-teal-700"
+                className="bg-teal-600 text-white hover:cursor-pointer text-sm px-8 py-3 rounded-md hover:bg-teal-700"
               >
                 Interview
               </button>

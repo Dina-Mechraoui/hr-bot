@@ -11,7 +11,7 @@ export default function InterviewPage() {
     details: {
       name: 'Cybersecurity Analyst',
       description:
-        'As a Cybersecurity Analyst at SecureNet Global, you will be responsible for monitoring, analyzing, and responding to security events and incidents across our clients’ networks...',
+        'As a Cybersecurity Analyst at SecureNet Global, you will be responsible for monitoring, analyzing, and responding to security events and incidents across our clients’ networks. You will collaborate with a team of experts to identify vulnerabilities, implement security measures, and ensure compliance with industry standards.',
       qualifications: [
         'Bachelor’s degree in Computer Science, Information Security or a related field.',
         '3+ years of experience in cybersecurity or a similar role.',
@@ -23,7 +23,7 @@ export default function InterviewPage() {
       type: 'Full-time',
       hours: 'Monday to Friday, 9 AM to 5 PM',
       companyOverview:
-        'SecureNet Global is a leading cybersecurity firm dedicated to protecting businesses worldwide from digital threats...',
+        'Company OverviewSecureNet Global is a leading cybersecurity firm dedicated to protecting businesses worldwide from digital threats. With a focus on innovative security solutions and a commitment to excellence, we help our clientsnavigate the complex landscape of cybersecurity. Our team is passionate about staying ahead of emerging threats and delivering top-tier services that ensure our clients data and networks remain secure.',
       contact: 'careers@securenetglobal.dz\n023–643–6753',
     },
   }
@@ -140,7 +140,7 @@ export default function InterviewPage() {
 
           <div className="bg-white px-4 py-3 border-t flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm">
-              <img src="/avatar.png" alt="You" className="w-6 h-6 rounded-full" />
+              <img src="/assets/avatar.png" alt="You" className="w-6 h-6 rounded-full" />
             </div>
             <input
               placeholder="Type your message"
