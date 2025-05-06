@@ -41,13 +41,13 @@ const HeroSection = () => {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
           <Link
-            href="/auth/signup/hr"
+            href="/register/recruiter"
             className="bg-[#468585] cursor-pointer text-white font-semibold py-2 px-8 rounded-full hover:bg-[#386969] transition"
           >
             I am an HR
           </Link>
           <Link
-            href="/auth/signup/jobseeker"
+            href="/register/condidate"
             className="bg-[#468585] cursor-pointer text-white font-semibold py-2 px-8 rounded-full hover:bg-[#386969] transition"
           >
             I am a Job Seeker

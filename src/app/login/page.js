@@ -6,8 +6,11 @@ import Link from 'next/link';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { loginUser } from '@/api/auth';
+import { useRouter } from 'next/navigation';
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
   const [data, setData] = useState({
     email: '',
     password: '',
@@ -18,11 +21,24 @@ export default function SignIn() {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form data:', data);
+    try {
+      const res = await loginUser(data);
+      console.log("Login success:", res);
+  
+      if (res?.success && res?.user?.role) {
+        const role = res.user.role;
+        router.push(`/auth/${role}/Dashboard`);
+      } else {
+        alert("Login failed. No role found.");
+      }
+  
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Invalid credentials");
+    }
   };
-
   return (
     <div
       className="relative min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
@@ -37,7 +53,7 @@ export default function SignIn() {
           <h2 className="text-2xl font-semibold text-center mb-2">Log in</h2>
           <p className="text-sm text-center mb-6 text-gray-600">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="underline font-medium">
+            <Link href="/register" className="underline font-medium">
               Sign up
             </Link>
           </p>
@@ -82,7 +98,7 @@ export default function SignIn() {
                 }}
               />
               <div className="text-right mt-1">
-                <Link href="/auth/forgot-password" className="text-sm underline text-gray-700 hover:text-[#468585]">
+                <Link href="/forgot-password" className="text-sm underline text-gray-700 hover:text-[#468585]">
                   Forgot your password
                 </Link>
               </div>

@@ -104,7 +104,7 @@ export default function ResetPassword() {
                 ? setStep(2)
                 : step === 2
                 ? setStep(3)
-                : router.push('/auth/signin');
+                : router.push('/login');
             }}
             className="w-full mt-4 cursor-pointer bg-[#468585] text-white font-semibold py-2 rounded-full hover:bg-[#386969] transition"
           >
@@ -115,7 +115,7 @@ export default function ResetPassword() {
         </form>
 
         <div className="mt-6 text-sm text-center text-gray-600">
-          <Link href="/auth/signin" className="underline hover:text-[#468585]">
+          <Link href="/login" className="underline hover:text-[#468585]">
             Back to login
           </Link>
         </div>

@@ -9,21 +9,23 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import ReCAPTCHA from 'react-google-recaptcha';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { RegisterRecruiter } from '@/api/auth';
 
 export default function Agent() {
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    name: '',
-    company: '',
-    companyField: '',
+    full_name: '',
     email: '',
     password: '',
     gender: '',
-    dob: null,
-    acceptTerms: false,
+    role: 'HR',
+    company_name: '',
+    company_field: '',
+    date_of_birth: null,
+    agreed_to_terms: "true",
   });
 
   const handleChange = (e) => {
@@ -35,30 +37,22 @@ export default function Agent() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { name, company, companyField, email, password, dob, acceptTerms } = formData;
-
-    if (!name || !email || !password || !company || !companyField || !dob) {
-      alert('Please fill all required fields including your date of birth.');
-      return;
+    
+    try {
+      const response = await RegisterRecruiter({
+        ...formData,
+        date_of_birth: formData.date_of_birth?.format("YYYY-MM-DD") || "",
+      });
+      console.log("sign up success:", response);
+      router.push("/login");
+    } catch (error) {
+      console.error('Error during form submission:', error);
+      alert('An error occurred while submitting the form. Please try again.');   
     }
-
-    if (!acceptTerms) {
-      alert('You must accept the terms and privacy policy.');
-      return;
-    }
-
-    const formattedDOB = dayjs(dob).format('YYYY-MM-DD');
-
-    const submissionData = {
-      ...formData,
-      dob: formattedDOB,
-    };
-
-    console.log('Form Data:', submissionData);
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -71,35 +65,36 @@ export default function Agent() {
         <p className="text-sm text-center text-gray-500 mb-6">Sign up with your email address</p>
 
         <form className="space-y-3" onSubmit={handleSubmit}>
-          <TextField
-            name="name"
-            label="Full Name"
-            placeholder='Enter your profile name'
-            value={formData.name}
-            onChange={handleChange}
-            fullWidth
-            className='!mb-3'
-          />
+        <TextField
+          name="full_name" // ✅ fixed
+          label="Full Name"
+          placeholder='Enter your profile name'
+          value={formData.full_name}
+          onChange={handleChange}
+          fullWidth
+          className='!mb-3'
+        />
 
-          <TextField
-            name="company"
-            label="Company Name"
-            placeholder='Enter your company name'
-            value={formData.company}
-            onChange={handleChange}
-            fullWidth
-            className='!mb-3'
-          />
+        <TextField
+          name="company_name" // ✅ fixed
+          label="Company Name"
+          placeholder='Enter your company name'
+          value={formData.company_name}
+          onChange={handleChange}
+          fullWidth
+          className='!mb-3'
+        />
 
-          <TextField
-            name="companyField"
-            label="Company Field"
-            placeholder='Enter your company field'
-            value={formData.companyField}
-            onChange={handleChange}
-            fullWidth
-            className='!mb-3'
-          />
+        <TextField
+          name="company_field" // ✅ fixed
+          label="Company Field"
+          placeholder='Enter your company field'
+          value={formData.company_field}
+          onChange={handleChange}
+          fullWidth
+          className='!mb-3'
+        />
+
 
           <TextField
             name="email"
@@ -147,8 +142,8 @@ export default function Agent() {
                   <input
                     type="radio"
                     name="gender"
-                    value="female"
-                    checked={formData.gender === 'female'}
+                    value="Female"
+                    checked={formData.gender === 'Female'}
                     onChange={handleChange}
                     className="mr-2"
                   />
@@ -158,8 +153,8 @@ export default function Agent() {
                   <input
                     type="radio"
                     name="gender"
-                    value="male"
-                    checked={formData.gender === 'male'}
+                    value="Male"
+                    checked={formData.gender === 'Male'}
                     onChange={handleChange}
                     className="mr-2"
                   />
@@ -169,12 +164,12 @@ export default function Agent() {
             </span>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
-                value={formData.dob}
+                value={formData.date_of_birth}
                 label="Date of Birth"
                 onChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    dob: value,
+                    date_of_birth: value,
                   }))
                 }
                 renderInput={(params) => <TextField {...params} fullWidth />}
@@ -188,16 +183,6 @@ export default function Agent() {
             <a href="#" target='_blank' className="text-[#468585] underline">Privacy Policy</a>.
           </p>
 
-
-            <ReCAPTCHA
-              sitekey="6LekIBYrAAAAAJTHgVpcACRiNdCHZ5rR6DRNmVc9"
-              onChange={(value) => {
-                setCaptchaValue(value);
-              }}
-              theme="light"
-              size="normal"
-            />
-
           <button
             type="submit"
             className="w-full mt-4 bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
@@ -207,7 +192,7 @@ export default function Agent() {
 
           <p className="text-sm text-center text-gray-500 mt-4">
             Already have an account?{' '}
-            <Link href="/auth/signin" className="underline text-[#468585]">
+            <Link href="/login" className="underline text-[#468585]">
               Log in
             </Link>
           </p>

@@ -1,7 +1,17 @@
 
 import Link from 'next/link';
 import { LogOut } from '@deemlol/next-icons';
+import { logoutUser } from '@/api/auth';
+
 const SidebarContent = ({ isActive, navLinks, data }) => {
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }
     return (
         <div className="w-full flex flex-col items-center justify-between h-full">
           <div className="w-full flex flex-col items-center">
@@ -28,7 +38,7 @@ const SidebarContent = ({ isActive, navLinks, data }) => {
             </nav>
           </div>
     
-          <button className="mb-2 flex items-center gap-2 border border-[#468585] text-[#468585] hover:bg-[#468585] hover:text-white transition px-4 py-2 rounded-full text-sm">
+          <button onClick={handleLogout} className="mb-2 flex items-center gap-2 border border-[#468585] text-[#468585] hover:bg-[#468585] hover:text-white transition px-4 py-2 rounded-full text-sm">
             <LogOut className="w-4 h-4 " />
             <span className='hidden lg:block'>Log Out</span>
           </button>

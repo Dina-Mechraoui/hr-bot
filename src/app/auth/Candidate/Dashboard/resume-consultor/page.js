@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ResumeConsultation } from '@/api/candidate';
 
 export default function ResumeConsulter() {
   const [jobDescription, setJobDescription] = useState('');
@@ -16,32 +17,19 @@ export default function ResumeConsulter() {
     }
   };
 
-  const handleConsult = () => {
-    if (jobDescription && resumeFile) {
-
-        setResultData({
-          match: '85%',
-          finalThoughts: 'Overall, this applicant suits well the job.',
-          weaknesses: [
-            'Proficiency in HTML, CSS, and JavaScript.',
-            'Strong experience with database management.',
-            'Solid problem-solving skills.',
-          ],
-          improvements: [
-            'Add specific projects involving Node.js and Django to your resume.',
-            'Highlight any experience with cloud services and DevOps tools.',
-            'Incorporate relevant keywords from the job description.',
-          ],
-          keywords: ['Node.js', 'Django', 'DevOps'],
-          strengths: [
-            'Lack of experience with Node.js and Django.',
-            'No mention of cloud services (e.g., AWS, Google Cloud).',
-            'Missing details on DevOps practices.',
-          ],
-        });
-
-        setShowResult(true);
-
+  const handleConsult = async () => {
+    if (!resumeFile || !jobDescription) return;
+  
+    setLoading(true);
+    try {
+      const data = await ResumeConsultation({ jobDescription, resumeFile });
+      setResultData(data);
+      console.log(data);
+      setShowResult(true);
+    } catch (error) {
+      alert("Failed to process resume. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,19 +113,20 @@ export default function ResumeConsulter() {
               <div>
                 <p className="font-bold">Matching Percentage</p>
                 <p className="text-sm text-gray-700 mt-1">
-                  Our resume matches <strong>{resultData.match}</strong> of the job description.
+                  Our resume matches <strong>{resultData.match_percentage
+                  }</strong> of the job description.
                 </p>
               </div>
 
               <div>
                 <p className="font-bold">Final Thoughts</p>
-                <p className="text-sm text-gray-700 mt-1">{resultData.finalThoughts}</p>
+                <p className="text-sm text-gray-700 mt-1">{resultData.feedback}</p>
               </div>
 
               <div>
-                <p className="font-bold">Weaknesses</p>
+                <p className="font-bold">Strengths</p>
                 <ul className="text-sm text-gray-700 list-disc list-inside">
-                  {resultData.weaknesses.map((item, i) => (
+                  {resultData.strengths.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
@@ -146,7 +135,7 @@ export default function ResumeConsulter() {
               <div>
                 <p className="font-bold">Improvement Tips</p>
                 <ul className="text-sm text-gray-700 list-disc list-inside">
-                  {resultData.improvements.map((item, i) => (
+                  {resultData.areas_for_improvement.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
@@ -155,18 +144,18 @@ export default function ResumeConsulter() {
 
             <div className="space-y-4">
               <div>
-                <p className="font-bold">Missing Keywords</p>
+                <p className="font-bold">Missing Skills</p>
                 <ul className="text-sm text-gray-700 list-disc list-inside">
-                  {resultData.keywords.map((kw, i) => (
+                  {resultData.missing_skills.map((kw, i) => (
                     <li key={i}>{kw}</li>
                   ))}
                 </ul>
               </div>
 
               <div>
-                <p className="font-bold">Strengths</p>
+                <p className="font-bold">Recommendations</p>
                 <ul className="text-sm text-gray-700 list-disc list-inside">
-                  {resultData.strengths.map((item, i) => (
+                  {resultData.recommendations.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
                 </ul>

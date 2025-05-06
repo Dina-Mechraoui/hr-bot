@@ -9,20 +9,21 @@ import Link from 'next/link';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import ReCAPTCHA from 'react-google-recaptcha';
-
+import { RegisterCandidate } from '@/api/auth';
+import { useRouter } from 'next/navigation';
 
 export default function JobSeekerSignUp() {
   const [fileName, setFileName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    name: '',
-    field: '',
+    last_name: '',
+    first_name: '',
     email: '',
     password: '',
     gender: '',
-    dob: null,
+    date_of_birth: null,
     resume: null,
     shareData: false,
   });
@@ -44,11 +45,19 @@ export default function JobSeekerSignUp() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form Data:', formData);
-    console.log('DOB:', formData.dob.d);
-
+    try {
+      const response = await RegisterCandidate({
+        ...formData,
+        date_of_birth: formData.date_of_birth?.format("YYYY-MM-DD") || "",
+      });
+      console.log("Registration successful:", response);
+      router.push("/login");
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("Registration failed. Please try again.");
+    }
   };
 
   return (
@@ -63,20 +72,19 @@ export default function JobSeekerSignUp() {
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <TextField
-            name="name"
-            label="Full Name"
-            placeholder="Enter your profile name"
-            value={formData.name}
+            name="first_name"
+            label="First Name"
+            placeholder="Enter your First name"
+            value={formData.first_name}
             onChange={handleChange}
             fullWidth
             className="!mb-3"
           />
-          
           <TextField
-            name="field"
-            label="Field"
-            placeholder="Enter your field"
-            value={formData.field}
+            name="last_name"
+            label="Last Name"
+            placeholder="Enter your last name"
+            value={formData.last_name}
             onChange={handleChange}
             fullWidth
             className="!mb-3"
@@ -141,8 +149,8 @@ export default function JobSeekerSignUp() {
                   <input
                     type="radio"
                     name="gender"
-                    value="female"
-                    checked={formData.gender === 'female'}
+                    value="Female"
+                    checked={formData.gender === 'Female'}
                     onChange={handleChange}
                     className="mr-2"
                   />
@@ -152,8 +160,8 @@ export default function JobSeekerSignUp() {
                   <input
                     type="radio"
                     name="gender"
-                    value="male"
-                    checked={formData.gender === 'male'}
+                    value="Male"
+                    checked={formData.gender === 'Male'}
                     onChange={handleChange}
                     className="mr-2"
                   />
@@ -165,8 +173,8 @@ export default function JobSeekerSignUp() {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date of Birth"
-                  value={formData.dob}
-                  onChange={(value) => setFormData((prev) => ({ ...prev, dob: value }))}
+                  value={formData.date_of_birth}
+                  onChange={(value) => setFormData((prev) => ({ ...prev, date_of_birth: value }))}
                 />
               </LocalizationProvider>
             </span>
@@ -176,7 +184,7 @@ export default function JobSeekerSignUp() {
             <input
               type="checkbox"
               name="shareData"
-              checked={formData.acceptTerms}
+              checked={formData.shareData}
               onChange={handleChange}
               className="mr-2 mt-1"
             />
@@ -189,15 +197,6 @@ export default function JobSeekerSignUp() {
             <a href="#" target='_blank' className="text-[#468585] underline">Privacy Policy</a>.
           </p>
 
-            <ReCAPTCHA
-              sitekey="6LekIBYrAAAAAJTHgVpcACRiNdCHZ5rR6DRNmVc9"
-              onChange={(value) => {
-                setCaptchaValue(value);
-              }}
-              theme="light"
-              size="normal"
-            />
-
           <button
             type="submit"
             className="w-full mt-2 bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
@@ -207,7 +206,7 @@ export default function JobSeekerSignUp() {
 
           <p className="text-sm text-center text-gray-500 mt-4">
             Already have an account?{' '}
-            <Link href="/auth/signin" className="underline text-[#468585]">Log in</Link>
+            <Link href="/login" className="underline text-[#468585]">Log in</Link>
           </p>
         </form>
       </div>

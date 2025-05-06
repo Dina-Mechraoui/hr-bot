@@ -58,13 +58,13 @@ export default function Navbar() {
 
             <div className="hidden md:flex items-center justify-end gap-4 w-1/3">
               <Link
-                href="/auth/signin"
+                href="/login"
                 className="border-teal-700 text-black border-2 font-semibold px-6 py-2 rounded-full hover:bg-teal-50 transition"
               >
                 Login
               </Link>
               <Link
-                href="/auth/signup"
+                href="/register"
                 className="bg-teal-700 text-white border-2 border-teal-700 font-semibold px-6 py-2 rounded-full hover:bg-teal-800 transition"
               >
                 Join Now
@@ -118,7 +118,7 @@ export default function Navbar() {
               </button>
 
               <Link
-                href="/auth/signin"
+                href="/login"
                 className="w-full text-center font-semibold border-2 rounded-md border-teal-700 px-4 py-2"
                 onClick={() => setIsOpen(false)}
               >
@@ -126,7 +126,7 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/auth/signup"
+                href="/register"
                 className="w-full text-center font-semibold text-white bg-teal-700 px-4 py-2 rounded-md"
                 onClick={() => setIsOpen(false)}
               >

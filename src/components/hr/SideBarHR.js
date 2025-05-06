@@ -15,14 +15,15 @@ import SidebarContent from '../SidebarContent';
 export default function SideBarHR() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  
 
   const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`);
 
   const navLinks = [
-    { href: '/hr-dashboard/status', icon: <Search className="w-5 h-5" />, label: "Applications' Status" },
-    { href: '/hr-dashboard/posts', icon: <FileText className="w-5 h-5" />, label: 'Posts' },
-    { href: '/hr-dashboard/tracker', icon: <BarChart className="w-5 h-5" />, label: 'Usage Tracker' },
-    { href: '/hr-dashboard/settings', icon: <Settings className="w-5 h-5" />, label: 'Settings' }
+    { href: '/auth/HR/Dashboard/status', icon: <Search className="w-5 h-5" />, label: "Applications' Status" },
+    { href: '/auth/HR/Dashboard/posts', icon: <FileText className="w-5 h-5" />, label: 'Posts' },
+    { href: '/auth/HR/Dashboard/tracker', icon: <BarChart className="w-5 h-5" />, label: 'Usage Tracker' },
+    { href: '/auth/HR/Dashboard/settings', icon: <Settings className="w-5 h-5" />, label: 'Settings' }
   ];
 
   return (

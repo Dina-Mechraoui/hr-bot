@@ -49,7 +49,7 @@ export default function SignUp() {
               </p>
             </div>
             <Link
-              href='/auth/signup/hr'
+              href='/register/recruiter'
               className="w-full bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
             >
               I am an HR agent
@@ -68,7 +68,7 @@ export default function SignUp() {
               </p>
             </div>
             <Link
-              href='/auth/signup/jobseeker'
+              href='/register/candidate'
               className="w-full bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
             >
               I am a job seeker
@@ -78,7 +78,7 @@ export default function SignUp() {
 
         <p className="text-sm mt-10 text-center text-gray-600">
           Already have an account?{' '}
-          <Link href="/auth/signin" className="underline font-medium text-[#468585] hover:text-[#386969]">
+          <Link href="/login" className="underline font-medium text-[#468585] hover:text-[#386969]">
             Log in
           </Link>
         </p>

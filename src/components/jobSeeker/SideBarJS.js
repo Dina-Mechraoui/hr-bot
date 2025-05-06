@@ -19,11 +19,11 @@ export default function SideBarJS() {
   const isActive = (path) => pathname === path;
 
   const navLinks = [
-    { href: '/js-dashboard/posts', icon: <Search className="w-5 h-5" />, label: "Posts" },
-    { href: '/js-dashboard/resume-consultor', icon: <FileText className="w-5 h-5" />, label: 'Resume Consultor' },
-    { href: '/js-dashboard/status', icon: <BarChart className="w-5 h-5" />, label: 'Applications Status' },
-    { href: '/js-dashboard/tracker', icon: <Settings className="w-5 h-5" />, label: 'Usage Tracker'},
-    { href: '/js-dashboard/settings', icon: <Settings className="w-5 h-5" />, label: 'Settings' }
+    { href: '/auth/Candidate/Dashboard/posts', icon: <Search className="w-5 h-5" />, label: "Posts" },
+    { href: '/auth/Candidate/Dashboard/resume-consultor', icon: <FileText className="w-5 h-5" />, label: 'Resume Consultor' },
+    { href: '/auth/Candidate/Dashboard/status', icon: <BarChart className="w-5 h-5" />, label: 'Applications Status' },
+    { href: '/auth/Candidate/Dashboard/tracker', icon: <Settings className="w-5 h-5" />, label: 'Usage Tracker'},
+    { href: '/auth/Candidate/Dashboard/settings', icon: <Settings className="w-5 h-5" />, label: 'Settings' }
   ];
 
   return (
