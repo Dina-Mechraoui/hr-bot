@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DeleteAccountModal from '@/components/DeleteAccountModal';
-
+import { getUserSettings } from '@/api/candidate';
 export default function JSSettings() {
   const initialUser = {
     name: 'Lilia Ali',
@@ -14,12 +14,29 @@ export default function JSSettings() {
     resumeName: 'Lilia-resume.pdf',
   };
 
+
   const [user, setUser] = useState(initialUser);
   const [editingField, setEditingField] = useState(null);
   const [tempValue, setTempValue] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await getUserSettings();
+        setUser(data);
+      } catch (error) {
+        console.error('Failed to fetch user settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+  
   const handleEdit = (field, value) => {
     setEditingField(field);
     setTempValue(value);
@@ -66,7 +83,7 @@ export default function JSSettings() {
                 {user.photo ? (
                   <img src={user.photo} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <img src="/avatar-placeholder.svg" alt="Avatar" className="w-full h-full object-cover" />
+                  <img src="/assets/avatar.png" alt="Avatar" className="w-full h-full object-cover" />
                 )}
               </div>
               <label

@@ -29,10 +29,38 @@ export const ResumeConsultation = async ({jobDescription, resumeFile}) => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-
+    console.log("Resume Consultation Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching resume data:", error);
+    throw error;
+  }
+}
+
+export const getUserSettings = async () => {
+  try {
+    const response = await axios.get("/profiles/settings/candidate/", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching settings data:", error);
+    throw error;
+  }
+}
+
+export const getJobOffers = async () => {
+  try {
+    const response = await axios.get("/job_offers/job-offers/", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching job offers:", error);
     throw error;
   }
 }

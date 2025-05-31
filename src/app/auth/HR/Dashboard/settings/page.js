@@ -1,27 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DeleteAccountModal from '@/components/DeleteAccountModal';
+import { getSettings, updateSettings } from '@/api/hr';
 
 export default function SettingsPage() {
-  const initialUser = {
-    fullName: 'Hamid Ait Alli',
-    company: 'Thyck Tech Dz',
-    email: 'thynktechdz@gmail.com',
-    field: 'Tech',
-    dob: '2018-02-29',
-    gender: 'Male',
-    overview:
-      'SecureNet Global is a leading cybersecurity firm dedicated to protecting businesses worldwide from digital threats. With a focus on innovative security solutions and a commitment to excellence, we help our clients navigate the complex landscape of cybersecurity. Our team is passionate about staying ahead of emerging threats and delivering top-tier services that ensure our clients’ data and networks remain secure.',
-    username: 'thycktechdz',
-    logo: null,
-  };
-
-  const [userData, setUserData] = useState(initialUser);
+  const [userData, setUserData] = useState({});
+  const [originalData, setOriginalData] = useState({});
+  const [updateUser, setUpdateUser] = useState({});
   const [editingField, setEditingField] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const madeChanges = JSON.stringify(userData) !== JSON.stringify(initialUser);
   const [tempValue, setTempValue] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const madeChanges = JSON.stringify(userData) !== JSON.stringify(originalData);
 
   const handleEdit = (field, value) => {
     setEditingField(field);
@@ -30,6 +22,7 @@ export default function SettingsPage() {
 
   const saveEdit = () => {
     setUserData({ ...userData, [editingField]: tempValue });
+    setUpdateUser({ ...updateUser, [editingField]: tempValue });
     setEditingField(null);
     setTempValue('');
   };
@@ -40,10 +33,43 @@ export default function SettingsPage() {
   };
 
   const handleCancelAll = () => {
-    setUserData(initialUser);
+    setUserData(originalData);
+    setUpdateUser({});
     setEditingField(null);
     setTempValue('');
   };
+
+  const handleConfirm = async () => {
+    try {
+      const filteredUpdate = Object.fromEntries(
+        Object.entries(updateUser).filter(([_, value]) => value !== '')
+      );
+      console.log('Filtered update data:', filteredUpdate);
+      const response = await updateSettings(filteredUpdate);
+      console.log('Updated settings:', response);
+
+      setOriginalData({ ...userData });
+      setUpdateUser({});
+    } catch (error) {
+      console.error('Update failed:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await getSettings();
+        setUserData(data.data);
+        setOriginalData(data.data);
+      } catch (error) {
+        console.error('Failed to fetch user settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   return (
     <div className="p-4 md:p-10">
@@ -79,6 +105,7 @@ export default function SettingsPage() {
                   if (file) {
                     const url = URL.createObjectURL(file);
                     setUserData((prev) => ({ ...prev, logo: url }));
+                    setUpdateUser((prev) => ({ ...prev, logo: file }));
                   }
                 }}
               />
@@ -87,11 +114,11 @@ export default function SettingsPage() {
 
           <div className="space-y-6 text-sm text-gray-700">
             {[
-              { label: 'Full name', field: 'fullName' },
-              { label: 'Company name', field: 'company' },
+              { label: 'Full name', field: 'full_name' },
+              { label: 'Company name', field: 'company_name' },
               { label: 'Email address', field: 'email' },
-              { label: 'Company field', field: 'field' },
-              { label: 'Date Of Birth', field: 'dob' },
+              { label: 'Company field', field: 'company_field' },
+              { label: 'Date Of Birth', field: 'date_of_birth' },
               { label: 'Gender', field: 'gender' },
             ].map(({ label, field }) => (
               <div key={field}>
@@ -199,7 +226,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-      {showDeleteModal && 
+
+      {showDeleteModal && (
         <DeleteAccountModal
           post={{ title: `@${userData.username}` }}
           onCancel={() => setShowDeleteModal(false)}
@@ -207,8 +235,7 @@ export default function SettingsPage() {
             setShowDeleteModal(false);
           }}
         />
-      }
-      
+      )}
 
       <div className="mt-10 flex justify-end gap-4">
         <button
@@ -225,6 +252,7 @@ export default function SettingsPage() {
 
         <button
           disabled={!madeChanges}
+          onClick={handleConfirm}
           className={`px-5 py-2 text-sm rounded ${
             madeChanges
               ? 'bg-[#468585] text-white hover:bg-[#386969] hover:cursor-pointer'

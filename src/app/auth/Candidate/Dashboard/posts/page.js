@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from '@deemlol/next-icons'
+import { getJobOffers } from '@/api/candidate'
 
 const jobs = [
   {
@@ -46,6 +47,15 @@ const jobs = [
 export default function JobsPage() {
   const [selectedApp, setSelectedApp] = useState(null)
   const router = useRouter()
+  useEffect(() => {
+    const getJobOffer = async () => {
+      const res = await getJobOffers();
+      console.log('Job offers:', res);
+    };
+  
+    getJobOffer();
+  }, []);
+  
 
   return (
     <div className="p-4 md:p-10">

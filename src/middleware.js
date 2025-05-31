@@ -10,32 +10,21 @@ export default async function middleware(req) {
   const response = NextResponse.next();
 
   const accessToken = cookies.get("access")?.value;
-  console.log("Access Token in Middleware:", accessToken);
   const refreshToken = cookies.get("refresh")?.value;
-  console.log("Refresh Token in Middleware:", refreshToken);
   const role = cookies.get("role")?.value;
-  console.log("Role in Middleware:", role);
   const profileReview = cookies.get("profile_review")?.value;
-  console.log("Profile Review in Middleware:", profileReview);
   const userDataCookie = cookies.get("user")?.value;
-  console.log("User Data Cookie in Middleware:", userDataCookie);
   const userData = userDataCookie ? JSON.parse(userDataCookie) : null;
-  console.log("User Data in Middleware:", userData);
   const hasPersonalProfile = true
-  console.log("Has Personal Profile in Middleware:", hasPersonalProfile);
 
   const requiresAuth = (pathname) => pathname.startsWith("/auth");
 
   if (accessToken && role) {
     try {
       const user = await authenticated(accessToken, refreshToken);
-      console.log("User in middleware:", user);
       if (typeof user === "string") {
         response.cookies.set("access", user);
-        console.log("Updated access token in middleware.");
       }
-
-      console.log("User after verifyToken:", user);
 
       if (user) {
         if (role === "Admin") {

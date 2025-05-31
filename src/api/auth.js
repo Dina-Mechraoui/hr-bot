@@ -8,18 +8,16 @@ export const loginUser = async ({ email, password }) => {
     });
     const { access, refresh, user, success } = response.data;
 
-
-    console.log("Login success")
     Cookies.set("success", success);
     Cookies.set("access", access);
     Cookies.set("refresh", refresh);
-  
+    const accessToken = Cookies.get("access");
+    console.log("Access Token:", accessToken);
+    // axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     Cookies.set("role", user.role);
     Cookies.set("profile_review", user.status);
   
     Cookies.set("user", JSON.stringify(user));
-
-    console.log("User data set in cookies:", user);
     return response.data;
 };
 
@@ -57,6 +55,7 @@ export const RegisterCandidate = async (data) => {
     "/profiles/signup/candidates/",
     formData
   );
+  return response.data;
 };
 
 export const RegisterRecruiter = async (data) => {
@@ -81,5 +80,33 @@ export const RegisterRecruiter = async (data) => {
       },
     }
   );
+
   return response.data;
 };
+
+export const forgotPasswordCode = async (email) => {
+  const response = await axios.post("/profiles/forget-password/email-verification/", {
+    email,
+  });
+  if (response.data.success === true) {
+    const sendCode = await axios.post("/profiles/forget-password/send-code/", {
+      email,
+    });
+    return sendCode.data;
+  }
+}
+
+export const verifyCode = async (email, code) => {
+  const response = await axios.post("/profiles/forget-password/verify-code/", {
+    email,
+    code,
+  });
+  return response.data;
+}
+export const resetPassword = async (email, newPassword) => {
+  const response = await axios.post("/profiles/forget-password/reset-password/", {
+    email,
+    newPassword,
+  });
+  return response.data;
+} 

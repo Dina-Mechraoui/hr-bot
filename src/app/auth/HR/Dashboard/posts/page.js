@@ -1,17 +1,19 @@
 'use client';
 
+import { createJobOffer } from '@/api/hr';
 import { useState } from 'react';
 
 export default function CreateJobPost() {
   const [form, setForm] = useState({
-    jobName: '',
-    description: '',
-    qualifications: '',
+    job_name: '',
+    job_description: '',
+    required_qualification: '',
     location: '',
-    workHours: '',
-    benefits: '',
-    employmentType: '',
-    image: null,
+    work_hours: '',
+    salary_and_benefits: '',
+    employment_type: '',
+    picture: null,
+    custom_questions: [],
   });
 
   const handleChange = (e) => {
@@ -28,10 +30,37 @@ export default function CreateJobPost() {
       }));
     }
   };
+  const handleCustomQuestionChange = (index, value) => {
+    const updatedQuestions = [...form.custom_questions];
+    updatedQuestions[index] = { question: value };
+    setForm((prev) => ({ ...prev, custom_questions: updatedQuestions }));
+  };
+  
+  const addCustomQuestion = () => {
+    setForm((prev) => ({
+      ...prev,
+      custom_questions: [...prev.custom_questions, { question: '' }],
+    }));
+  };
+  
+  const removeCustomQuestion = (index) => {
+    const updatedQuestions = [...form.custom_questions];
+    updatedQuestions.splice(index, 1);
+    setForm((prev) => ({ ...prev, custom_questions: updatedQuestions }));
+  };
+  
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitted form:', form);
+    try {
+      const response = await createJobOffer(form);
+      console.log('Submitted form:', form);
+      console.log('Response:', response);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred while submitting the form. Please try again later.');
+      
+    }
   };
 
   return (
@@ -48,9 +77,9 @@ export default function CreateJobPost() {
             <label className="font-semibold">Job name</label>
             <input
               type="text"
-              name="jobName"
+              name="job_name"
               placeholder="Describe the job you want to apply for ...."
-              value={form.jobName}
+              value={form.job_name}
               onChange={handleChange}
               className="w-full border rounded px-4 py-2 mt-1 text-sm"
             />
@@ -59,9 +88,9 @@ export default function CreateJobPost() {
           <div>
             <label className="font-semibold">Job description</label>
             <textarea
-              name="description"
+              name="job_description"
               placeholder="Describe the job you want to apply for ...."
-              value={form.description}
+              value={form.job_description}
               onChange={handleChange}
               className="w-full border rounded px-4 py-2 mt-1 text-sm min-h-[100px]"
             />
@@ -70,9 +99,9 @@ export default function CreateJobPost() {
           <div>
             <label className="font-semibold">Required qualification</label>
             <textarea
-              name="qualifications"
+              name="required_qualification"
               placeholder="Describe the job you want to apply for ...."
-              value={form.qualifications}
+              value={form.required_qualification}
               onChange={handleChange}
               className="w-full border rounded px-4 py-2 mt-1 text-sm min-h-[100px]"
             />
@@ -89,15 +118,49 @@ export default function CreateJobPost() {
               className="w-full border rounded px-4 py-2 mt-1 text-sm"
             />
           </div>
+          <div>
+          <span className='flex items-center justify-between'>
+            <label className="font-semibold">Custom Questions</label>                 
+              <button
+                  type="button"
+                  onClick={addCustomQuestion}
+                  className="text-sm underline self-end hover:cursor-pointer text-[#468585] hover:text-[#386969] transition" 
+                >
+                  + Add a question
+                </button>
+          </span>
+              
+              <div className="space-y-3">
+                {form.custom_questions.map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={item.question}
+                      onChange={(e) => handleCustomQuestionChange(index, e.target.value)}
+                      placeholder="Enter a custom question..."
+                      className="w-full border rounded px-4 py-2 mt-1 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeCustomQuestion(index)}
+                      className="text-sm"
+                    >
+                      remove
+                    </button>
+                  </div>
+                ))}
+
+              </div>
+            </div>
         </div>
 
         <div className="space-y-6 flex flex-col justify-between">
           <div className="space-y-6">
             <div>
               <div className="relative w-40 h-40 rounded-md bg-gray-200 flex items-center justify-center">
-                {form.image ? (
+                {form.picture ? (
                   <img
-                    src={form.image}
+                    src={form.picture}
                     alt="Preview"
                     className="w-full h-full object-cover rounded-md"
                   />
@@ -123,9 +186,9 @@ export default function CreateJobPost() {
               <label className="font-semibold">Work hours</label>
               <input
                 type="text"
-                name="workHours"
+                name="work_hours"
                 placeholder="Describe the job you want to apply for ...."
-                value={form.workHours}
+                value={form.work_hours}
                 onChange={handleChange}
                 className="w-full border rounded px-4 py-2 mt-1 text-sm"
               />
@@ -134,28 +197,32 @@ export default function CreateJobPost() {
             <div>
               <label className="font-semibold">Salary and benefits</label>
               <textarea
-                name="benefits"
+                name="salary_and_benefits"
                 placeholder="Describe the job you want to apply for ...."
-                value={form.benefits}
+                value={form.salary_and_benefits}
                 onChange={handleChange}
                 className="w-full border rounded px-4 py-2 mt-1 text-sm min-h-[100px]"
               />
             </div>
 
             <div>
-              <label className="font-semibold">Employement type</label>
-              <input
-                type="text"
-                name="employmentType"
-                placeholder="Describe the job you want to apply for ...."
-                value={form.employmentType}
+              <label className="font-semibold">Employment Type</label>
+              <select
+                name="employment_type"
+                value={form.employment_type}
                 onChange={handleChange}
                 className="w-full border rounded px-4 py-2 mt-1 text-sm"
-              />
+              >
+                <option value="">Select employment type</option>
+                <option value="full_time">Full-time</option>
+                <option value="part_time">Part-time</option>
+                <option value="contract">Contract</option>
+                <option value="internship">Internship</option>
+                <option value="temporary">Temporary</option>
+              </select>
             </div>
-          </div>
 
-          <div className="pt-4 self-end">
+            <div className="pt-4 justify-self-end">
             <button
               type="submit"
               className="bg-[#468585] hover:cursor-pointer text-white text-sm font-medium px-8 py-2 rounded-full hover:bg-[#386969] transition"
@@ -163,6 +230,10 @@ export default function CreateJobPost() {
               Publish
             </button>
           </div>
+
+          </div>
+
+          
         </div>
       </form>
     </div>

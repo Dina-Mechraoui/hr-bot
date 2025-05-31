@@ -37,7 +37,7 @@ export default function CandidateUsageTracker() {
       <TrackerCircle
           label="Applications"
           value={appsUsed}
-          total={7}
+          total={appsLimit}
           subtitle="Days Left: Unknown"
         />
         <TrackerCircle

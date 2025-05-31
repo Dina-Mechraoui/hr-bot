@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { LogOut } from '@deemlol/next-icons';
 import { logoutUser } from '@/api/auth';
+import Cookies from "js-cookie";
 
 const SidebarContent = ({ isActive, navLinks, data }) => {
   const handleLogout = async () => {
@@ -12,6 +13,8 @@ const SidebarContent = ({ isActive, navLinks, data }) => {
       console.error('Logout failed:', error);
     }
   }
+  const user = Cookies.get("user");
+  const name = data?.user?.full_name || 'Lilia Ali';
     return (
         <div className="w-full flex flex-col items-center justify-between h-full">
           <div className="w-full flex flex-col items-center">
@@ -19,7 +22,7 @@ const SidebarContent = ({ isActive, navLinks, data }) => {
     
             <div className="flex flex-col w-full items-center bg-[#468585] mb-6 p-2">
               <img src="/assets/avatar.png" alt="Profile" className="w-12 h-12 rounded-full" />
-              <p className="text-white px-4 py-1 mt-2 font-medium text-sm">Lilia Ali</p>
+              <p className="text-white px-4 py-1 mt-2 font-medium text-sm">{name}</p>
             </div>
     
             <nav className="flex flex-col font-semibold items-center space-y-6 w-full px-2">

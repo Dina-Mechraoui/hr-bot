@@ -7,10 +7,15 @@ import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from 'next/navigation';
+import { forgotPasswordCode, resetPassword, verifyCode } from '@/api/auth';
 
 export default function ResetPassword() {
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
   const router = useRouter();
   return (
     <div
@@ -51,6 +56,8 @@ export default function ResetPassword() {
                 placeholder="Enter your email"
                 fullWidth
                 autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           )}
@@ -63,6 +70,8 @@ export default function ResetPassword() {
                 label="Verification Code"
                 type="text"
                 variant="outlined"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
                 placeholder="Enter the code sent to your email"
                 fullWidth
               />
@@ -76,6 +85,8 @@ export default function ResetPassword() {
                 name="newPassword"
                 label="New Password"
                 variant="outlined"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your new password"
                 fullWidth
@@ -98,14 +109,49 @@ export default function ResetPassword() {
 
           <button
             type="submit"
-            onClick={(e) => {
-                e.preventDefault();
-                step === 1
-                ? setStep(2)
-                : step === 2
-                ? setStep(3)
-                : router.push('/login');
+            onClick={async (e) => {
+              e.preventDefault();
+              if (step === 1) {
+                try {
+                  const result = await forgotPasswordCode(email);
+                  if (result.success) {
+                    setStep(2);
+                  } else {
+                    alert("Failed to send code.");
+                  }
+                } catch (error) {
+                  console.error(error);
+                  alert("Error sending verification code.");
+                }
+              } else if (step === 2) {
+                try {
+                  const result = await verifyCode(email, code);
+                  if (!result.success) {
+                    setStep(3);
+                  } else {
+                    alert("Invalid verification code.");
+                  }
+                } catch (error) {
+                  console.error(error);
+                  alert("Error verifying code.");
+                }
+              } else {
+                try {
+                  const result = await resetPassword(email, newPassword);
+                  if (result.success) {
+                    alert("Password reset successfully.");
+                    router.push('/login');
+                  } else {
+                    alert("Failed to reset password.");
+                  }
+                } catch (error) {
+                  console.error(error);
+                  alert("Error resetting password.");
+                }
+                router.push('/login');
+              }
             }}
+
             className="w-full mt-4 cursor-pointer bg-[#468585] text-white font-semibold py-2 rounded-full hover:bg-[#386969] transition"
           >
             {step === 1 && 'Send Code'}
