@@ -2,22 +2,18 @@
 
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import { Eye, EyeOff } from '@deemlol/next-icons';
 import Link from 'next/link';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { RegisterCandidate } from '@/api/auth';
 import { useRouter } from 'next/navigation';
+import { useForm } from '@/hooks/useForm';
+import PasswordField from '@/components/common/PasswordField';
+import { useRegister } from '@/hooks/useRegister';
 
-export default function JobSeekerSignUp() {
-  const [fileName, setFileName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const router = useRouter();
-  const [formData, setFormData] = useState({
+export default function RegisterCandidatePage() {
+  const { formValues, handleChange, setFormValues } = useForm({
     last_name: '',
     first_name: '',
     email: '',
@@ -28,35 +24,13 @@ export default function JobSeekerSignUp() {
     shareData: false,
   });
 
+  const [fileName, setFileName] = useState('');
+  const { handleRegister, loading, error } = useRegister(RegisterCandidate);
+
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
       setFileName(e.target.files[0].name);
-      setFormData((prev) => ({ ...prev, resume: e.target.files[0] }));
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    if (name === 'shareData') {
-      setFormData((prev) => ({ ...prev, shareData: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await RegisterCandidate({
-        ...formData,
-        date_of_birth: formData.date_of_birth?.format("YYYY-MM-DD") || "",
-      });
-      console.log("Registration successful:", response);
-      router.push("/login");
-    } catch (error) {
-      console.error("Error during registration:", error);
-      alert("Registration failed. Please try again.");
+      setFormValues((prev) => ({ ...prev, resume: e.target.files[0] }));
     }
   };
 
@@ -70,28 +44,35 @@ export default function JobSeekerSignUp() {
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-2">Sign up</h2>
         <p className="text-sm text-center text-gray-500 mb-6">Sign up with your email address</p>
 
-        <form className="space-y-3" onSubmit={handleSubmit}>
+        <form className="space-y-3" onSubmit={(e) => handleRegister(e, formValues)}>
           <TextField
             name="first_name"
             label="First Name"
-            placeholder="Enter your First name"
-            value={formData.first_name}
+            placeholder="Enter your first name"
+            value={formValues.first_name}
             onChange={handleChange}
             fullWidth
+            error={!!error.first_name}
+            helperText={error.first_name}
             className="!mb-3"
           />
+
           <TextField
             name="last_name"
             label="Last Name"
             placeholder="Enter your last name"
-            value={formData.last_name}
+            value={formValues.last_name}
             onChange={handleChange}
             fullWidth
+            error={!!error.last_name}
+            helperText={error.last_name}
             className="!mb-3"
           />
 
           <div className="border border-dashed flex items-center justify-between border-gray-300 rounded-md p-4 text-center">
-            <label className="text-sm font-medium flex items-center gap-3 text-gray-500"><img src='/assets/upload.svg' className='w-8'/>Resume</label>
+            <label className="text-sm font-medium flex items-center gap-3 text-gray-500">
+              <img src="/assets/upload.svg" className="w-8" alt="Upload" />Resume
+            </label>
             <input type="file" id="resume" onChange={handleFileChange} className="hidden" />
             <label
               htmlFor="resume"
@@ -100,39 +81,29 @@ export default function JobSeekerSignUp() {
               {fileName || 'SELECT FILE'}
             </label>
           </div>
+          {error.resume && (
+            <p className="text-sm text-red-500 mt-1">{error.resume}</p>
+          )}
 
           <TextField
             name="email"
             label="Email"
             placeholder="Enter your email"
             type="email"
-            value={formData.email}
+            value={formValues.email}
             onChange={handleChange}
             fullWidth
+            error={!!error.email}
+            helperText={error.email}
             className="!mb-3"
           />
 
-          <TextField
+          <PasswordField
             name="password"
-            label="Password"
-            placeholder="Enter your password"
-            type={showPassword ? 'text' : 'password'}
-            value={formData.password}
+            error={!!error.password}
+            helperText={error.password}
+            value={formValues.password}
             onChange={handleChange}
-            fullWidth
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    edge="end"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
           />
 
           <p className="text-xs text-gray-500 mb-3">
@@ -150,7 +121,7 @@ export default function JobSeekerSignUp() {
                     type="radio"
                     name="gender"
                     value="Female"
-                    checked={formData.gender === 'Female'}
+                    checked={formValues.gender === 'Female'}
                     onChange={handleChange}
                     className="mr-2"
                   />
@@ -161,20 +132,37 @@ export default function JobSeekerSignUp() {
                     type="radio"
                     name="gender"
                     value="Male"
-                    checked={formData.gender === 'Male'}
+                    checked={formValues.gender === 'Male'}
                     onChange={handleChange}
                     className="mr-2"
                   />
                   Male
                 </label>
               </div>
+              {error.gender && (
+                <p className="text-sm text-red-500 mt-1">{error.gender}</p>
+              )}
             </span>
+
             <span>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date of Birth"
-                  value={formData.date_of_birth}
-                  onChange={(value) => setFormData((prev) => ({ ...prev, date_of_birth: value }))}
+                  value={formValues.date_of_birth}
+                  onChange={(value) =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      date_of_birth: value,
+                    }))
+                  }
+                  slots={{ textField: TextField }}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!error.date_of_birth,
+                      helperText: error.date_of_birth,
+                    },
+                  }}
                 />
               </LocalizationProvider>
             </span>
@@ -184,24 +172,28 @@ export default function JobSeekerSignUp() {
             <input
               type="checkbox"
               name="shareData"
-              checked={formData.shareData}
+              checked={formValues.shareData}
               onChange={handleChange}
               className="mr-2 mt-1"
             />
             <span>Share my registration data with our HR agents.</span>
           </div>
+          {error.shareData && (
+            <p className="text-red-500 text-sm mt-1">{error.shareData}</p>
+          )}
 
           <p className="text-xs text-gray-500">
             By creating an account, you agree to the{' '}
-            <a href="#" target='_blank' className="text-[#468585] underline">Terms of use</a> and{' '}
-            <a href="#" target='_blank' className="text-[#468585] underline">Privacy Policy</a>.
+            <a href="#" target="_blank" className="text-[#468585] underline">Terms of use</a> and{' '}
+            <a href="#" target="_blank" className="text-[#468585] underline">Privacy Policy</a>.
           </p>
 
           <button
             type="submit"
-            className="w-full mt-2 bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
+            disabled={loading}
+            className="w-full mt-4 bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition cursor-pointer disabled:opacity-60"
           >
-            Sign up
+            {loading ? "Signing up..." : "Sign up"}
           </button>
 
           <p className="text-sm text-center text-gray-500 mt-4">

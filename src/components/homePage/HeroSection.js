@@ -47,7 +47,7 @@ const HeroSection = () => {
             I am an HR
           </Link>
           <Link
-            href="/register/condidate"
+            href="/register/candidate"
             className="bg-[#468585] cursor-pointer text-white font-semibold py-2 px-8 rounded-full hover:bg-[#386969] transition"
           >
             I am a Job Seeker

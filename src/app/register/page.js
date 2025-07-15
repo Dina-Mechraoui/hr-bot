@@ -1,12 +1,11 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SignUp() {
-  const router = useRouter();
-
+  const searchParams = useSearchParams();
   return (
     <div
       className={`
@@ -68,7 +67,7 @@ export default function SignUp() {
               </p>
             </div>
             <Link
-              href='/register/candidate'
+              href={`/register/candidate?redirect=${searchParams.get("redirect") || ''}`}
               className="w-full bg-[#468585] text-white font-semibold py-3 rounded-full hover:bg-[#386969] transition"
             >
               I am a job seeker

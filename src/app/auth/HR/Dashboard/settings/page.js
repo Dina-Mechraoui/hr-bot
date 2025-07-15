@@ -1,75 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import DeleteAccountModal from '@/components/DeleteAccountModal';
+import dayjs from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { getSettings, updateSettings } from '@/api/hr';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function SettingsPage() {
-  const [userData, setUserData] = useState({});
-  const [originalData, setOriginalData] = useState({});
-  const [updateUser, setUpdateUser] = useState({});
-  const [editingField, setEditingField] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [tempValue, setTempValue] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  const madeChanges = JSON.stringify(userData) !== JSON.stringify(originalData);
-
-  const handleEdit = (field, value) => {
-    setEditingField(field);
-    setTempValue(value);
-  };
-
-  const saveEdit = () => {
-    setUserData({ ...userData, [editingField]: tempValue });
-    setUpdateUser({ ...updateUser, [editingField]: tempValue });
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const cancelEdit = () => {
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const handleCancelAll = () => {
-    setUserData(originalData);
-    setUpdateUser({});
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const handleConfirm = async () => {
-    try {
-      const filteredUpdate = Object.fromEntries(
-        Object.entries(updateUser).filter(([_, value]) => value !== '')
-      );
-      console.log('Filtered update data:', filteredUpdate);
-      const response = await updateSettings(filteredUpdate);
-      console.log('Updated settings:', response);
-
-      setOriginalData({ ...userData });
-      setUpdateUser({});
-    } catch (error) {
-      console.error('Update failed:', error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const data = await getSettings();
-        setUserData(data.data);
-        setOriginalData(data.data);
-      } catch (error) {
-        console.error('Failed to fetch user settings:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSettings();
-  }, []);
+  const {
+    userData,
+    editingField,
+    tempValue,
+    madeChanges,
+    startEditing,
+    cancelEditing,
+    setUserData,
+    saveEditing,
+    setTempValue,
+    updateField,
+    confirmChanges,
+    cancelAll,
+  } = useSettings(getSettings, updateSettings);
 
   return (
     <div className="p-4 md:p-10">
@@ -79,9 +32,9 @@ export default function SettingsPage() {
             <p className="font-semibold text-sm mb-2">Company Logo</p>
             <div className="relative w-40 h-40">
               <div className="w-full h-full rounded-full bg-gray-300 overflow-hidden">
-                {userData.logo ? (
+                {userData.company_logo ? (
                   <img
-                    src={userData.logo}
+                    src={userData.company_logo}
                     alt="Company Logo"
                     className="w-full h-full object-cover"
                   />
@@ -104,8 +57,8 @@ export default function SettingsPage() {
                   const file = e.target.files[0];
                   if (file) {
                     const url = URL.createObjectURL(file);
-                    setUserData((prev) => ({ ...prev, logo: url }));
-                    setUpdateUser((prev) => ({ ...prev, logo: file }));
+                    updateField('company_logo', file);
+                    setUserData((prev) => ({ ...prev, company_logo: url }));
                   }
                 }}
               />
@@ -127,28 +80,64 @@ export default function SettingsPage() {
                   {editingField !== field && (
                     <button
                       className="text-xs underline hover:cursor-pointer"
-                      onClick={() => handleEdit(field, userData[field])}
+                      onClick={() => startEditing(field, userData[field])}
                     >
                       Edit
                     </button>
                   )}
                 </div>
+
                 {editingField === field ? (
                   <div className="mt-2 space-y-2">
-                    <input
-                      value={tempValue}
-                      onChange={(e) => setTempValue(e.target.value)}
-                      className="border rounded px-3 py-1 w-full text-sm"
-                    />
-                    <div className="flex gap-2">
+                    {field === 'gender' ? (
+                      <div className="flex gap-6">
+                        {['Female', 'Male'].map((gender) => (
+                          <label key={gender} className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="gender"
+                              value={gender}
+                              checked={tempValue === gender}
+                              onChange={(e) => setTempValue(e.target.value)}
+                              className="mr-2"
+                            />
+                            {gender}
+                          </label>
+                        ))}
+                      </div>
+                    ) : field === 'date_of_birth' ? (
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={tempValue ? dayjs(tempValue) : null}
+                          onChange={(value) => {
+                            const formattedDate = value ? value.format('YYYY-MM-DD') : '';
+                            setTempValue(formattedDate);
+                          }}
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              size: 'small',
+                            },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    ) : (
+                      <input
+                        value={tempValue}
+                        onChange={(e) => setTempValue(e.target.value)}
+                        className="border rounded px-3 py-1 w-full text-sm"
+                      />
+                    )}
+
+                    <div className="flex gap-2 mt-2">
                       <button
-                        onClick={saveEdit}
+                        onClick={saveEditing}
                         className="text-sm text-white bg-[#468585] hover:cursor-pointer px-3 py-1 rounded hover:bg-[#386969]"
                       >
                         Save
                       </button>
                       <button
-                        onClick={cancelEdit}
+                        onClick={cancelEditing}
                         className="text-sm text-gray-600 hover:cursor-pointer hover:underline"
                       >
                         Cancel
@@ -168,17 +157,17 @@ export default function SettingsPage() {
           <div>
             <div className="flex justify-between items-center">
               <p className="font-semibold">Company overview</p>
-              {editingField !== 'overview' && (
+              {editingField !== 'company_overview' && (
                 <button
                   className="text-xs underline"
-                  onClick={() => handleEdit('overview', userData.overview)}
+                  onClick={() => startEditing('company_overview', userData.company_overview)}
                 >
                   Edit
                 </button>
               )}
             </div>
 
-            {editingField === 'overview' ? (
+            {editingField === 'company_overview' ? (
               <div className="mt-2 space-y-2">
                 <textarea
                   value={tempValue}
@@ -187,13 +176,13 @@ export default function SettingsPage() {
                 />
                 <div className="flex gap-2">
                   <button
-                    onClick={saveEdit}
+                    onClick={saveEditing}
                     className="text-sm text-white bg-[#468585] px-3 py-1 rounded hover:bg-[#386969]"
                   >
                     Save
                   </button>
                   <button
-                    onClick={cancelEdit}
+                    onClick={cancelEditing}
                     className="text-sm text-gray-600 hover:underline"
                   >
                     Cancel
@@ -202,44 +191,17 @@ export default function SettingsPage() {
               </div>
             ) : (
               <p className="text-gray-700 leading-relaxed mt-2">
-                {userData.overview}
+                {userData.company_overview}
               </p>
             )}
             <hr className="mt-6 border-gray-200" />
           </div>
-
-          <div className="space-y-1">
-            <p className="font-semibold">Delete account</p>
-            <p className="text-gray-600">
-              Do you want to delete your account :{' '}
-              <span className="text-[#468585] font-medium">
-                @{userData.username}
-              </span>
-              ?
-            </p>
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="text-red-600 text-sm mt-2 hover:underline hover:cursor-pointer font-semibold"
-            >
-              I want to delete my account
-            </button>
-          </div>
         </div>
       </div>
 
-      {showDeleteModal && (
-        <DeleteAccountModal
-          post={{ title: `@${userData.username}` }}
-          onCancel={() => setShowDeleteModal(false)}
-          onConfirm={() => {
-            setShowDeleteModal(false);
-          }}
-        />
-      )}
-
       <div className="mt-10 flex justify-end gap-4">
         <button
-          onClick={handleCancelAll}
+          onClick={cancelAll}
           disabled={!madeChanges}
           className={`px-5 py-2 text-sm rounded border ${
             madeChanges
@@ -252,7 +214,7 @@ export default function SettingsPage() {
 
         <button
           disabled={!madeChanges}
-          onClick={handleConfirm}
+          onClick={confirmChanges}
           className={`px-5 py-2 text-sm rounded ${
             madeChanges
               ? 'bg-[#468585] text-white hover:bg-[#386969] hover:cursor-pointer'

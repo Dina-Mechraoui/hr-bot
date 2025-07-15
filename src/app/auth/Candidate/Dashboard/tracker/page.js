@@ -11,7 +11,6 @@ export default function CandidateUsageTracker() {
       try {
         const data = await getUsageTracker();
         setUsage(data);
-        console.log(data);
       } catch (error) {
         console.error("Error fetching usage tracker data:", error);
       }
@@ -28,7 +27,6 @@ export default function CandidateUsageTracker() {
   const [appsUsed, appsLimit] = parseUsage(usage?.applications);
   const [resumesUsed, resumesLimit] = parseUsage(usage?.resume_consults);
 
-  console.log(usage);
 
   return (
     <div className="p-4 md:p-10">
@@ -38,13 +36,11 @@ export default function CandidateUsageTracker() {
           label="Applications"
           value={appsUsed}
           total={appsLimit}
-          subtitle="Days Left: Unknown"
         />
         <TrackerCircle
           label="Resume consulter"
-          value={resumesLimit}
-          total={resumesUsed}
-          subtitle="Days Left: Unknown"
+          value={resumesUsed}
+          total={resumesLimit}
         />
       </div>
     </div>

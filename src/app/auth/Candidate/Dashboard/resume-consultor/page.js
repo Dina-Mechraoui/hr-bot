@@ -24,7 +24,6 @@ export default function ResumeConsulter() {
     try {
       const data = await ResumeConsultation({ jobDescription, resumeFile });
       setResultData(data);
-      console.log(data);
       setShowResult(true);
     } catch (error) {
       alert("Failed to process resume. Please try again.");
@@ -103,7 +102,6 @@ export default function ResumeConsulter() {
               <p className="font-semibold mb-2">Resume</p>
               <div className="flex items-center nu gap-2 text-sm">
                 📄 {resumeFile?.name}{' '}
-                <span className="text-blue-600 underline cursor-pointer">Preview</span>
               </div>
             </div>
           </div>

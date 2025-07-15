@@ -1,12 +1,14 @@
+import { clearAllCookies } from "@/utils/clearAllCookies";
+
 // _lib/session.js
-export async function authenticated(accessToken, refreshToken) {
+export async function authenticated(accessToken, refreshAccessToken) {
     try {
       const payload = parseJwt(accessToken); 
-      if (!payload || isExpired(payload)) throw new Error("Expired token");
+      if (!payload || isExpired(payload)) clearAllCookies();
   
       return payload;
     } catch {
-      const newAccess = await refreshToken(refreshToken);
+      const newAccess = await refreshAccessToken(refreshToken);
       return newAccess;
     }
   }

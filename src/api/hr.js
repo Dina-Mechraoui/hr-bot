@@ -1,94 +1,89 @@
-import axios from "@/api/base";
-import Cookies from "js-cookie";
-
-const accessToken = Cookies.get("access");
+import { apiRequest } from "@/utils/apiRequest";
 
 
-export const getUsageTracker = async () => {
-  try {
-    console.log("Access Token:", accessToken);
-    const response = await axios.get("/profiles/usagetracker/dashboardHR/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-   console.log("Usage Tracker Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching usage tracker data:", error);
-    throw error;
+export const getUsageTracker = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/profiles/usagetracker/dashboardHR/",
+  });
+
+export const getSettings = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/profiles/settings/hr/",
+  });
+
+  export const updateSettings = async (data) => {
+  const formData = new FormData();
+  for (const key in data) {
+    if (data[key] !== undefined && data[key] !== null) {
+      formData.append(key, data[key]);
+    }
   }
-}
 
-export const getSettings = async () => {
-  try {
-    const response = await axios.get("/profiles/settings/hr/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching settings data:", error);
-    throw error;
-  }
-}
+  return await apiRequest({
+    method: "PATCH",
+    url: "/profiles/settings/hr/",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
 
-export const updateSettings = async (data) => {
-  try {
-    const formData = new FormData();
-    
-    for (const key in data) {
-      if (data[key] !== undefined && data[key] !== null) {
+export const getJobOffers = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/job_offers/list/",
+  });
+  
+export const getOneJobOffer = async (id) => {
+  const response = await apiRequest({
+    method: "GET",
+    url: `/job_offers/${id}/`,
+  });
+  return response;
+};
+
+export const createJobOffer = async (data) => {
+  const formData = new FormData();
+  for (const key in data) {
+    if (data[key] !== undefined && data[key] !== null) {
+      if (key === "custom_questions") {
+        formData.append("custom_questions", JSON.stringify(data[key]));
+      } else {
         formData.append(key, data[key]);
+        console.log(data[key])
       }
     }
-
-    const response = await axios.patch("/profiles/settings/hr/", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    console.log("Update Settings Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating settings data:", error);
-    throw error;
   }
+
+  return await apiRequest({
+    method: "POST",
+    url: "/job_offers/create/",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
-export const createJobOffer = async (data, accessToken) => {
-  try {
-    const accessToken = Cookies.get("access");
-    console.log(accessToken)
-    const formData = new FormData();
+export const deletePostById = async (job_offer_id) =>
+  await apiRequest({
+    method: "DELETE",
+    url: `/job_offers/${job_offer_id}/delete/`,
+  });
 
-    for (const key in data) {
-      if (data[key] !== undefined && data[key] !== null) {
-        if (key === 'custom_questions') {
-          formData.append('custom_questions', JSON.stringify(data.custom_questions));
-        } else if (key === 'image') {
-          formData.append('image', data.picture);
-        } else {
-          formData.append(key, data[key]);
-        }
-      }
-    }
-    console.log(accessToken)
+export const getApplicantsById = async (job_id) =>
+  await apiRequest({
+    method: "GET",
+    url: `/job_offers/${job_id}/applications/`,
+  });
 
-    const response = await axios.post("/job_offers/job-offers/create/", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
 
-    return response.data;
-  } catch (error) {
-    console.error("Error creating job offer:", error.response?.data || error);
-    throw error;
-  }
-};
-
+  export const updateApplicantStatus = async (application_id, data) =>
+    await apiRequest({
+      method: 'PATCH',
+      url:`/job_offers/applications/${application_id}/status/`,
+      data: data
+    })

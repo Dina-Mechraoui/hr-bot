@@ -1,66 +1,148 @@
-import axios from "@/api/base";
-import Cookies from "js-cookie";
+import { apiRequest } from "@/utils/apiRequest";
 
-const accessToken = Cookies.get("access");
-
-
-
-export const getUsageTracker = async () => {
+export const processInterviewData = async (jobId) => {
   try {
-    const response = await axios.get("/profiles/usagetracker/dashboardJS/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const response = await apiRequest({
+      method: "POST",
+      url: "/interviews/process-data/",
+      data: { job_id: jobId },
     });
-    return response.data;
+    console.log(response.job_offers_id)
+
+    return {
+      questions: response.questions,
+      interaction_id: response.interaction_id,
+      interviewCompleted: response.interviewCompleted,
+      job_offers_id: response.job_offers_id
+    };
   } catch (error) {
-    console.error("Error fetching usage tracker data:", error);
+    console.log('error', error)
+    const status = error.response?.status;
+    const message = error.response?.data?.error || "Unknown error";
+    console.log(message)
+
+    console.error("Unexpected error processing interview:", error);
+  }
+};
+
+export const submitInterviewAnswers = async (interactionId, answers) => {
+  try {
+    const response = await apiRequest({
+      method: "POST",
+      url: `/interviews/submit-answers/${interactionId}/`,
+      data: { answers },
+    });
+
+    return response;
+  } catch (error) {
+    const status = error.response?.status;
+    const message = error.response?.data?.error || "Unknown error";
     throw error;
   }
-}
+};
 
-export const ResumeConsultation = async ({jobDescription, resumeFile}) => {
+
+export const getUsageTracker = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/profiles/usagetracker/dashboardJS/",
+    withCredentials: true,
+  });
+
+export const getApplicationsJsStatus = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "job_offers/applications/js_status",
+    withCredentials:true
+  });
+
+export const getOneJobOffer = async (id) => {
+  const response = await apiRequest({
+    method: "GET",
+    url: `/job_offers/${id}/`,
+  });
+  return response.data;
+};
+
+export const getJobOffer = async (link) => {
   try {
-    const formData = new FormData();
-    formData.append("resume", resumeFile);
-    formData.append("job_description", jobDescription);
-    const response = await axios.post(`/profiles/resume-consultor/`,formData, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const response = await apiRequest({
+      method: "GET",
+      url: `/interviews/job-offers/${link}/`,
     });
-    console.log("Resume Consultation Response:", response.data);
-    return response.data;
+
+    const job_id = response.job_id;
+
+    const interview = await processInterviewData(job_id);
+
+    if (interview?.interviewCompleted) {
+      return {
+        interviewCompleted: interview.interviewCompleted,
+        job_id,
+      };
+    }
+
+    const jobData = await getOneJobOffer(job_id);
+
+    return {
+      questions: interview.questions,
+      interaction_id: interview.interaction_id,
+      jobData,
+    };
   } catch (error) {
-    console.error("Error fetching resume data:", error);
+    console.error("Error in getJobOffer:", error.response?.data || error);
     throw error;
   }
-}
+};
 
-export const getUserSettings = async () => {
-  try {
-    const response = await axios.get("/profiles/settings/candidate/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching settings data:", error);
-    throw error;
-  }
-}
 
-export const getJobOffers = async () => {
-  try {
-    const response = await axios.get("/job_offers/job-offers/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching job offers:", error);
-    throw error;
+export const ResumeConsultation = async ({ jobDescription, resumeFile }) => {
+  const formData = new FormData();
+  formData.append("resume", resumeFile);
+  formData.append("job_description", jobDescription);
+
+  return await apiRequest({
+    method: "POST",
+    url: `/profiles/resume-consultor/`,
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const getUserSettings = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/profiles/settings/candidate/",
+  });
+
+export const getJobOffers = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/interviews/candidate/accessed-offers/",
+  });
+
+export const getApplications = async () =>
+  await apiRequest({
+    method: "GET",
+    url: "/job_offers/job-offers/applications/js_status/",
+  });
+
+  export const updateSettings = async (data) => {
+  const formData = new FormData();
+  for (const key in data) {
+    if (data[key] !== undefined && data[key] !== null) {
+      formData.append(key, data[key]);
+    }
   }
-}
+
+  return await apiRequest({
+    method: "PATCH",
+    url: "/profiles/settings/candidate/",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};

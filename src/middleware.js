@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-// import { cookies } from "next/headers";
 import { authenticated } from "./_lib/session";
 
 export default async function middleware(req) {
-  console.log("Middleware invoked");
-
   const { nextUrl, cookies } = req;
   const path = nextUrl.pathname;
   const response = NextResponse.next();
@@ -15,35 +12,52 @@ export default async function middleware(req) {
   const profileReview = cookies.get("profile_review")?.value;
   const userDataCookie = cookies.get("user")?.value;
   const userData = userDataCookie ? JSON.parse(userDataCookie) : null;
-  const hasPersonalProfile = true
+
+  const hasPersonalProfile = true;
 
   const requiresAuth = (pathname) => pathname.startsWith("/auth");
+  const isCandidateInvite = path.startsWith("/invite/");
 
+  // Redirect unauthenticated users visiting /invite/[slug]
+  if (isCandidateInvite && !accessToken) {
+    const redirectToLogin = new URL("/login", req.url);
+    redirectToLogin.searchParams.set("redirect", path);
+    return NextResponse.redirect(redirectToLogin);
+  }
+
+  // If tokens exist, check session
   if (accessToken && role) {
     try {
       const user = await authenticated(accessToken, refreshToken);
+
       if (typeof user === "string") {
-        response.cookies.set("access", user);
+        response.cookies.set("access", user); // token was refreshed
       }
 
       if (user) {
-        if (role === "Admin") {
-          if (
-            path === "/" ||
-            path === "/auth/Admin/Dashboard"
-          ) {
-            return NextResponse.next();
-          } else {
+        if (isCandidateInvite) {
+          if (role === "Candidate") {
+            const slug = path.split("/invite/")[1];
             return NextResponse.redirect(
-              new URL("/auth/Admin/Dashboard", req.url)
+              new URL(`/auth/Candidate/Dashboard/posts/${slug}`, req.url)
             );
+          } else {
+            return NextResponse.redirect(new URL("/auth/Not-Reviewed", req.url));
           }
         }
 
+        // --- Admin ---
+        if (role === "Admin") {
+          if (path === "/" || path.startsWith("/auth/Admin/Dashboard")) {
+            return response;
+          } else {
+            return NextResponse.redirect(new URL("/auth/Admin/Dashboard", req.url));
+          }
+        }
+
+        // --- Candidate ---
         if (role === "Candidate") {
-          console.log("Candidate role detected");
           if (!hasPersonalProfile && path !== "/auth") {
-            console.log('here?')
             return NextResponse.redirect(new URL(`/auth/${role}/Dashboard`, req.url));
           }
 
@@ -54,32 +68,21 @@ export default async function middleware(req) {
             path !== "/" &&
             hasPersonalProfile
           ) {
-            console.log("Redirecting to Candidate Dashboard");
-            return NextResponse.redirect(
-              new URL(`/auth/${role}/Dashboard`, req.url)
-            );
+            return NextResponse.redirect(new URL(`/auth/${role}/Dashboard`, req.url));
           }
 
-          if (path === "auth/Not-Reviewed" && hasPersonalProfile) {
-            return NextResponse.redirect(
-              new URL(`/auth/${role}/Dashboard`, req.url)
-            );
+          if (path === "/auth/Not-Reviewed" && hasPersonalProfile) {
+            return NextResponse.redirect(new URL(`/auth/${role}/Dashboard`, req.url));
           }
-          
         }
 
+        // --- Recruiter ---
         if (role === "Recruiter") {
-          // if (!hasPersonalProfile && path !== "/auth") {
-          //   return NextResponse.redirect(new URL("/auth", req.url));
-          // }
-
           if (
             (profileReview === "Pending" || profileReview === "Rejected") &&
             path !== "/auth/Not-Reviewed"
           ) {
-            return NextResponse.redirect(
-              new URL("/auth/Not-Reviewed", req.url)
-            );
+            return NextResponse.redirect(new URL("/auth/Not-Reviewed", req.url));
           }
 
           if (
@@ -89,73 +92,54 @@ export default async function middleware(req) {
               profileReview === null) &&
             path !== "/auth/Not-Reviewed"
           ) {
-            return NextResponse.redirect(
-              new URL("/auth/Not-Reviewed", req.url)
-            );
+            return NextResponse.redirect(new URL("/auth/Not-Reviewed", req.url));
           }
         }
 
-        // Restrict access to other role routes within auth
-        if (
-          path.includes("login") ||
-          (path.includes("register") &&
-            profileReview === "Accepted")
-        ) {
-          return NextResponse.redirect(
-            new URL(`/auth/${role}/Dashboard`, req.url)
-          );
+        // Block access to invite page if not Candidate
+        if (isCandidateInvite && role !== "Candidate") {
+          return NextResponse.redirect(new URL("/auth/Not-Reviewed", req.url));
         }
 
-        if ((path === "/auth") || hasPersonalProfile) {
-          profileReview === "Accepted"
+        // Redirect away from login/register if already logged in
+        if (
+          path.includes("login") ||
+          (path.includes("register") && profileReview === "Accepted")
+        ) {
+          return NextResponse.redirect(new URL(`/auth/${role}/Dashboard`, req.url));
+        }
+
+        // Accepted profile = redirect to dashboard
+        if (path === "/auth") {
+          return profileReview === "Accepted"
             ? NextResponse.redirect(new URL(`/auth/${role}/Dashboard`, req.url))
             : NextResponse.redirect(new URL("/auth/Not-Reviewed", req.url));
         }
 
-        if (
-          requiresAuth(path) &&
-          !path.includes(role) &&
-          path !== `/auth/${role}/Dashboard` &&
-          (hasPersonalProfile) &&
-          profileReview === "Accepted"
-        ) {
-          return NextResponse.redirect(
-            new URL(`/auth/${role}/Dashboard`, req.url)
-          );
-        }
-
         return response;
       } else {
-        // Refresh token failed; redirect to login if auth is required
         if (requiresAuth(path)) {
           return NextResponse.redirect(new URL("/register", req.url));
         }
       }
     } catch (error) {
       console.error("Authentication error:", error);
-
       if (requiresAuth(path)) {
         return NextResponse.redirect(new URL("/register", req.url));
       }
     }
   } else {
-    // Redirect unauthenticated users if auth is required
+    // No access token → redirect if auth required
     if (requiresAuth(path)) {
-      console.log("Redirecting unauthenticated request to login.");
-      console.log("Path:", path);
-      console.log(req.url);
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
-    // if (path === "/companies") {
-    //   return NextResponse.next();
-    // }
+  // ✅ All good
+  return response;
+}
 
-    console.log("Request passed middleware without issues.");
-    return response;
-  }
-
+// Match all routes except static/image assets
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

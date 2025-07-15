@@ -4,8 +4,9 @@ export default function TrackerCircle({ label, value, total, subtitle = '' }) {
     const stroke = 12;
     const normalizedRadius = radius - stroke / 2;
     const circumference = normalizedRadius * 2 * Math.PI;
-    const percent = Math.min((value / total) * 100, 100);
+    const percent = total > 0 ? Math.min((value / total) * 100, 100) : 0;
     const strokeDashoffset = circumference * (1 - percent / 100);
+    
   
     return (
       <div className="flex flex-col items-center">

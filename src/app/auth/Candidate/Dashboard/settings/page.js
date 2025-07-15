@@ -1,99 +1,57 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DeleteAccountModal from '@/components/DeleteAccountModal';
-import { getUserSettings } from '@/api/candidate';
-export default function JSSettings() {
-  const initialUser = {
-    name: 'Lilia Ali',
-    email: 'jennyfox@gmail.com',
-    gender: 'Male',
-    dob: '30/05/1997',
-    field: 'Artificial Intelligent',
-    photo: '/assets/avatar.png',
-    resumeName: 'Lilia-resume.pdf',
-  };
+import { getUserSettings, updateSettings } from '@/api/candidate';
+import { useSettings } from '@/hooks/useSettings';
+import dayjs from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
+export default function CandidateSettingsPage() {
 
-  const [user, setUser] = useState(initialUser);
-  const [editingField, setEditingField] = useState(null);
-  const [tempValue, setTempValue] = useState('');
-  const [resumeFile, setResumeFile] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const data = await getUserSettings();
-        setUser(data);
-      } catch (error) {
-        console.error('Failed to fetch user settings:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSettings();
-  }, []);
-  
-  const handleEdit = (field, value) => {
-    setEditingField(field);
-    setTempValue(value);
-  };
-
-  const saveEdit = () => {
-    setUser({ ...user, [editingField]: tempValue });
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const cancelEdit = () => {
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const handleResumeUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setResumeFile(file);
-      setUser((prev) => ({
-        ...prev,
-        resumeName: file.name,
-      }));
-    }
-  };
-
-  const handleCancelAll = () => {
-    setUser(initialUser);
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const madeChanges = JSON.stringify(user) !== JSON.stringify(initialUser);
+  const {
+    userData,
+    editingField,
+    tempValue,
+    madeChanges,
+    startEditing,
+    cancelEditing,
+    setUserData,
+    saveEditing,
+    setTempValue,
+    updateField,
+    confirmChanges,
+    cancelAll,
+  } = useSettings(getUserSettings, updateSettings);
 
   return (
-    <div className="md:p-10 p-4">
+    <div className="p-4 md:p-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div className="space-y-10">
           <div>
             <p className="font-semibold text-sm mb-2">Profile Picture</p>
             <div className="relative w-40 h-40">
-              <div className="w-full h-full rounded-full bg-gray-200 overflow-hidden">
-                {user.photo ? (
-                  <img src={user.photo} alt="Profile" className="w-full h-full object-cover" />
+              <div className="w-full h-full rounded-full bg-gray-300 overflow-hidden">
+                {userData.photo ? (
+                  <img
+                    src={userData.photo}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <img src="/assets/avatar.png" alt="Avatar" className="w-full h-full object-cover" />
+                  <img src="/assets/avatar.png" alt="Default Avatar" className='w-full h-full object-cover' />
                 )}
               </div>
               <label
-                htmlFor="profile-upload"
+                htmlFor="photo-upload"
                 className="absolute bottom-2 left-2 bg-white text-sm px-3 py-1 rounded-full shadow-md cursor-pointer"
               >
-                ✎ Edit
+                Edit
               </label>
               <input
-                id="profile-upload"
+                id="photo-upload"
                 type="file"
                 accept="image/*"
                 className="hidden"
@@ -101,29 +59,29 @@ export default function JSSettings() {
                   const file = e.target.files[0];
                   if (file) {
                     const url = URL.createObjectURL(file);
-                    setUser((prev) => ({ ...prev, photo: url }));
+                    updateField('photo', file);
+                    setUserData((prev) => ({ ...prev, photo: url }));
                   }
                 }}
               />
             </div>
           </div>
 
-          {/* Editable Fields */}
           <div className="space-y-6 text-sm text-gray-700">
             {[
-              { label: 'Name', field: 'name' },
+              { label: 'First Name', field: 'first_name' },
+              { label: 'Last Name', field: 'last_name' },
               { label: 'Email address', field: 'email' },
               { label: 'Gender', field: 'gender' },
-              { label: 'Date of birth', field: 'dob' },
-              { label: 'Field', field: 'field' },
+              { label: 'Date of Birth', field: 'date_of_birth' },
             ].map(({ label, field }) => (
               <div key={field}>
                 <div className="flex justify-between">
                   <p className="text-gray-500">{label}</p>
                   {editingField !== field && (
                     <button
-                      className="hover:cursor-pointer text-xs underline"
-                      onClick={() => handleEdit(field, user[field])}
+                      className="text-xs underline hover:cursor-pointer"
+                      onClick={() => startEditing(field, userData[field])}
                     >
                       Edit
                     </button>
@@ -131,28 +89,63 @@ export default function JSSettings() {
                 </div>
                 {editingField === field ? (
                   <div className="mt-2 space-y-2">
-                    <input
-                      value={tempValue}
-                      onChange={(e) => setTempValue(e.target.value)}
-                      className="border rounded px-3 py-1 w-full text-sm"
-                    />
-                    <div className="flex gap-2">
+                    {field === 'gender' ? (
+                      <div className="flex gap-6">
+                        {['Female', 'Male'].map((gender) => (
+                          <label key={gender} className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="gender"
+                              value={gender}
+                              checked={tempValue === gender}
+                              onChange={(e) => setTempValue(e.target.value)}
+                              className="mr-2"
+                            />
+                            {gender}
+                          </label>
+                        ))}
+                      </div>
+                    ) : field === 'date_of_birth' ? (
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={tempValue ? dayjs(tempValue) : null}
+                          onChange={(value) => {
+                            const formattedDate = value ? value.format('YYYY-MM-DD') : '';
+                            setTempValue(formattedDate);
+                          }}
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              size: 'small',
+                            },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    ) : (
+                      <input
+                        value={tempValue}
+                        onChange={(e) => setTempValue(e.target.value)}
+                        className="border rounded px-3 py-1 w-full text-sm"
+                      />
+                    )}
+
+                    <div className="flex gap-2 mt-2">
                       <button
-                        onClick={saveEdit}
-                        className="text-sm text-white bg-[#468585] px-3 py-1 rounded hover:bg-[#386969]"
+                        onClick={saveEditing}
+                        className="text-sm text-white bg-[#468585] hover:cursor-pointer px-3 py-1 rounded hover:bg-[#386969]"
                       >
                         Save
                       </button>
                       <button
-                        onClick={cancelEdit}
-                        className="text-sm text-gray-600 hover:underline"
+                        onClick={cancelEditing}
+                        className="text-sm text-gray-600 hover:cursor-pointer hover:underline"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <p className="mt-1 font-medium">{user[field]}</p>
+                  <p className="mt-1 font-medium">{userData[field]}</p>
                 )}
                 <hr className="mt-3 border-gray-200" />
               </div>
@@ -160,12 +153,10 @@ export default function JSSettings() {
           </div>
         </div>
 
-        {/* Right Side */}
         <div className="space-y-10 text-sm text-gray-800">
-          {/* Resume */}
           <div>
             <p className="font-semibold mb-2">Resume</p>
-            <p className="font-semibold text-black mb-2">{user.resumeName}</p>
+            <p className="font-semibold text-black mb-2">{userData.resume || 'No resume uploaded'}</p>
             <div
               className="border border-dashed border-gray-300 rounded-lg p-5 flex items-center justify-between relative"
               onDragOver={(e) => e.preventDefault()}
@@ -173,8 +164,8 @@ export default function JSSettings() {
                 e.preventDefault();
                 const file = e.dataTransfer.files[0];
                 if (file && file.type === 'application/pdf') {
-                  setResumeFile(file);
-                  setUser((prev) => ({ ...prev, resumeName: file.name }));
+                  updateField('resume', file);
+                  setUserData((prev) => ({ ...prev, resume: file.name }));
                 }
               }}
             >
@@ -184,7 +175,7 @@ export default function JSSettings() {
                 </span>
                 <div>
                   <p className="font-semibold text-sm">Select a file or drag and drop here</p>
-                  <p className="text-xs text-gray-500">PDF, file size no more than 10MB</p>
+                  <p className="text-xs text-gray-500">PDF, max 10MB</p>
                 </div>
               </div>
               <label
@@ -198,39 +189,22 @@ export default function JSSettings() {
                 type="file"
                 accept="application/pdf"
                 className="hidden"
-                onChange={handleResumeUpload}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    updateField('resume', file);
+                    setUserData((prev) => ({ ...prev, resume: file.name }));
+                  }
+                }}
               />
             </div>
-          </div>
-
-          {/* Delete Account */}
-          <div className="space-y-1">
-            <p className="font-semibold">Delete account</p>
-            <p className="text-gray-600">Do you want to delete your account?</p>
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="text-red-600 text-sm mt-2 hover:underline hover:cursor-pointer font-semibold"
-            >
-              I want to delete my account
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <DeleteAccountModal
-          post={{ title: initialUser.name }}
-          onCancel={() => setShowDeleteModal(false)}
-          onConfirm={() => {
-            setShowDeleteModal(false);
-          }}
-        />
-      )}
-
       <div className="mt-10 flex justify-end gap-4">
         <button
-          onClick={handleCancelAll}
+          onClick={cancelAll}
           disabled={!madeChanges}
           className={`px-5 py-2 text-sm rounded border ${
             madeChanges
@@ -243,6 +217,7 @@ export default function JSSettings() {
 
         <button
           disabled={!madeChanges}
+          onClick={confirmChanges}
           className={`px-5 py-2 text-sm rounded ${
             madeChanges
               ? 'bg-[#468585] text-white hover:bg-[#386969] hover:cursor-pointer'

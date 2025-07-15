@@ -39,13 +39,13 @@ export default function UsageTracker() {
         <TrackerCircle
           label="Applicants"
           value={usage?.applicants_count ?? 0}
-          total={0}  // no limit given
+          total={'NA'}
           subtitle=""
         />
         <TrackerCircle
           label="Recruitments"
           value={usage?.recruitments_count ?? 0}
-          total={0}  // no limit given
+          total={'NA'} 
           subtitle=""
         />
       </div>

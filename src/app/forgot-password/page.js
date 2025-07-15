@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff } from '@deemlol/next-icons';
-import Link from 'next/link';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from '@deemlol/next-icons';
 import { forgotPasswordCode, resetPassword, verifyCode } from '@/api/auth';
+import toast from 'react-hot-toast';
+import PasswordField from '@/components/common/PasswordField';
 
 export default function ResetPassword() {
   const [step, setStep] = useState(1);
@@ -15,17 +17,52 @@ export default function ResetPassword() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const router = useRouter();
-  return (
-    <div
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
-      style={{ backgroundImage: "url('/assets/loginPic.png')" }}
-    >
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-xs z-0" />
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (step === 1) {
+        const result = await forgotPasswordCode(email);
+        if (result?.success) {
+          setStep(2);
+        } else {
+          setError(result?.error || "Failed to send verification code.");
+        }
+      } else if (step === 2) {
+        const result = await verifyCode(email, code);
+        if (result?.success) {
+          setStep(3);
+        } else {
+          setError(result?.error || "Invalid verification code.");
+        }
+      } else if (step === 3) {
+        const result = await resetPassword(email, code ,newPassword);
+        if (result?.success) {
+          toast.success("Password reset successfully!");
+          router.push('/login');
+        } else {
+          setError(result?.error || "Failed to reset password.");
+        }
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/assets/loginPic.png')" }}>
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-xs z-0" />
       <div className="relative z-10 bg-[#F9F5F6] w-11/12 sm:w-4/5 md:w-2/3 lg:w-1/2 rounded-2xl p-6 md:p-16">
-        <div className="flex justify-center">
+        <div className="flex justify-center mb-4">
           <img src="/assets/LOGO.svg" alt="HRBot Logo" className="w-20 h-20" />
         </div>
 
@@ -35,128 +72,61 @@ export default function ResetPassword() {
           {step === 3 && 'Create New Password'}
         </h2>
 
-        <p className="text-sm text-center mb-6 text-gray-600">
-          {step === 1 &&
-            'Enter your email address to receive a verification code.'}
-          {step === 2 &&
-            'We’ve sent a verification code to your email. Please enter it below.'}
-          {step === 3 &&
-            'Create a new secure password for your account.'}
+        <p className="text-sm text-center text-gray-600 mb-6">
+          {step === 1 && 'Enter your email address to receive a verification code.'}
+          {step === 2 && 'Check your inbox and enter the code we sent.'}
+          {step === 3 && 'Create a secure new password.'}
         </p>
 
-        <form>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {step === 1 && (
-            <div className="mb-4">
-              <TextField
-                id="email"
-                name="email"
-                label="Email"
-                type="email"
-                variant="outlined"
-                placeholder="Enter your email"
-                fullWidth
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <TextField
+              id="email"
+              label="Email"
+              placeholder="Enter your email"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!error}
+              helperText={step === 1 ? error : ''}
+            />
           )}
 
           {step === 2 && (
-            <div className="mb-4">
-              <TextField
-                id="code"
-                name="code"
-                label="Verification Code"
-                type="text"
-                variant="outlined"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Enter the code sent to your email"
-                fullWidth
-              />
-            </div>
+            <TextField
+              id="code"
+              label="Verification Code"
+              placeholder="Enter the code"
+              fullWidth
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              error={!!error}
+              helperText={step === 2 ? error : ''}
+            />
           )}
 
           {step === 3 && (
-            <div className="mb-4">
-              <TextField
-                id="newPassword"
-                name="newPassword"
-                label="New Password"
-                variant="outlined"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your new password"
-                fullWidth
-                autoComplete="new-password"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        edge="end"
-                      >
-                        {showPassword ? <EyeOff /> : <Eye />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </div>
+            <PasswordField 
+              name='newPassword'
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              error={!!error}
+              helperText={step === 3 ? error : ''}
+            />
           )}
 
           <button
             type="submit"
-            onClick={async (e) => {
-              e.preventDefault();
-              if (step === 1) {
-                try {
-                  const result = await forgotPasswordCode(email);
-                  if (result.success) {
-                    setStep(2);
-                  } else {
-                    alert("Failed to send code.");
-                  }
-                } catch (error) {
-                  console.error(error);
-                  alert("Error sending verification code.");
-                }
-              } else if (step === 2) {
-                try {
-                  const result = await verifyCode(email, code);
-                  if (!result.success) {
-                    setStep(3);
-                  } else {
-                    alert("Invalid verification code.");
-                  }
-                } catch (error) {
-                  console.error(error);
-                  alert("Error verifying code.");
-                }
-              } else {
-                try {
-                  const result = await resetPassword(email, newPassword);
-                  if (result.success) {
-                    alert("Password reset successfully.");
-                    router.push('/login');
-                  } else {
-                    alert("Failed to reset password.");
-                  }
-                } catch (error) {
-                  console.error(error);
-                  alert("Error resetting password.");
-                }
-                router.push('/login');
-              }
-            }}
-
-            className="w-full mt-4 cursor-pointer bg-[#468585] text-white font-semibold py-2 rounded-full hover:bg-[#386969] transition"
+            disabled={loading}
+            className="w-full mt-2 bg-[#468585] text-white font-semibold py-2 rounded-full hover:bg-[#386969] transition disabled:opacity-60"
           >
-            {step === 1 && 'Send Code'}
-            {step === 2 && 'Verify Code'}
-            {step === 3 && 'Reset Password'}
+            {loading
+              ? "Please wait..."
+              : step === 1
+              ? "Send Code"
+              : step === 2
+              ? "Verify Code"
+              : "Reset Password"}
           </button>
         </form>
 
