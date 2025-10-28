@@ -23,7 +23,11 @@ export default function SettingsPage() {
     confirmChanges,
     cancelAll,
   } = useSettings(getSettings, updateSettings);
-
+  
+  const logoUrl = userData.company_logo 
+    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData.company_logo}` 
+    : null;
+  console.log(userData)
   return (
     <div className="p-4 md:p-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -34,7 +38,7 @@ export default function SettingsPage() {
               <div className="w-full h-full rounded-full bg-gray-300 overflow-hidden">
                 {userData.company_logo ? (
                   <img
-                    src={userData.company_logo}
+                    src={logoUrl} 
                     alt="Company Logo"
                     className="w-full h-full object-cover"
                   />

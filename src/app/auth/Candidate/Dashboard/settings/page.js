@@ -25,7 +25,10 @@ export default function CandidateSettingsPage() {
     confirmChanges,
     cancelAll,
   } = useSettings(getUserSettings, updateSettings);
-
+const logoUrl = userData.photo_js 
+    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData.photo_js}` 
+    : null;
+  console.log(userData)
   return (
     <div className="p-4 md:p-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -34,9 +37,9 @@ export default function CandidateSettingsPage() {
             <p className="font-semibold text-sm mb-2">Profile Picture</p>
             <div className="relative w-40 h-40">
               <div className="w-full h-full rounded-full bg-gray-300 overflow-hidden">
-                {userData.photo ? (
+                {userData.photo_js ? (
                   <img
-                    src={userData.photo}
+                    src={logoUrl}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
@@ -59,8 +62,8 @@ export default function CandidateSettingsPage() {
                   const file = e.target.files[0];
                   if (file) {
                     const url = URL.createObjectURL(file);
-                    updateField('photo', file);
-                    setUserData((prev) => ({ ...prev, photo: url }));
+                    updateField('photo_js', file);
+                    setUserData((prev) => ({ ...prev, photo_js: url }));
                   }
                 }}
               />
